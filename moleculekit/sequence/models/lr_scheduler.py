@@ -1,3 +1,5 @@
+import math
+
 class SquareSche():
     '''A simple wrapper class for learning rate scheduling'''
 
@@ -7,7 +9,7 @@ class SquareSche():
         self.base_lr = warm_up_end_lr
         self.warm_up_epoches = warm_up_epoches
         self.warm_up_step = (warm_up_end_lr - init_lr) / warm_up_epoches
-        self.decay_factor = warmup_end_lr * warm_up_epoches**0.5
+        self.decay_factor = warm_up_end_lr * warm_up_epoches**0.5
 
     def adjust_lr(self, optimizer, epoch):
         if epoch < self.warm_up_epoches:

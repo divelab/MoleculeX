@@ -7,7 +7,7 @@ conf_data_io['label_id'] = list(range(1,13))
 
 conf_net = {}
 conf_net['type'] = 'bert_tar'
-conf_net['param'] = {'task':'reg', 'n_out':1, 'hidden':1024, 'n_layers':6, 'attn_heads':4, 'dropout':0.1, 'embed':['pos'], 'use_att':False, 'activation':'gelu'}
+conf_net['param'] = {'task':'reg', 'n_out':12, 'hidden':1024, 'n_layers':6, 'attn_heads':4, 'dropout':0.1, 'embed':['pos'], 'activation':'gelu'}
 
 conf_optim = {}
 conf_optim['type'] = 'adam'
@@ -39,7 +39,7 @@ conf_trainer['use_aug'] = True
 conf_trainer['use_cls_token'] = True
 conf_trainer['save_model'] = 'best_valid'
 conf_trainer['save_valid_records'] = False
-conf_trainer['pretrain_model'] = 'results2e/bert_10.pth'
+conf_trainer['pretrain_model'] = None
 
 conf_tester = {}
 conf_tester['loss'] = conf_loss
@@ -53,3 +53,4 @@ conf_tester['use_cls_token'] = True
 assert conf_optim['type'] in ['adam', 'rms', 'sgd']
 assert conf_lr_scheduler['type'] in ['cos', 'linear', 'square', None]
 assert conf_net['param']['task'] == conf_tester['task']
+assert len(conf_data_io['label_id']) == conf_net['param']['n_out']

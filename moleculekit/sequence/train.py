@@ -2,11 +2,13 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from metric import *
-from tester import Tester
 from models import *
 import csv
 import random
 from data import *
+import argparse
+import os
+
 
 
 class Tester():
@@ -86,9 +88,9 @@ class Tester():
 
 
 class Trainer():
-    def __init__(self, trainfile, conf_trainer, conf_tester, splitfile=None, validfile=None, testfile=None, txtfile=None, npyfile=None):
-        self.txtfile = txtfile
-        self.npyfile = npyfile
+    def __init__(self, conf_trainer, conf_tester, out_path, trainfile, splitfile=None, validfile=None, testfile=None):
+        self.txtfile = os.path.join(out_path, 'record.txt')
+        self.out_path = out_path
         self.config = conf_trainer
 
         smile_id, label_id = self.config['data_io']['smile_id'], self.config['data_io']['label_id']
@@ -212,99 +214,124 @@ class Trainer():
                     mask = mask.to('cuda')
                 loss = self.criterion(outputs, labels, mask)
 
+            self.optim.zero_grad()
+            loss.backward()
+            self.optim.step()
+
             total_loss += loss.to('cpu').item()
             if batch % self.config['verbose'] == 0:
                 print('\t Training iteration {} | loss {}'.format(batch, loss.to('cpu').item()))
 
         print("\t Training | Average loss {}".format(total_loss/(batch+1)))
 
-    def _valid(self, epoch):
+    def _valid(self, epoch, metric_name1=None, metric_name2=None):
         self.net.eval()
-        if self.npyfile is not None:
-            metrics = self.valider.multi_task_test(model=self.net, npy_file = self.npyfile + '_{}.npy'.format(epoch))
-        else:
-            metrics = self.valider.multi_task_test(model=self.net)
+        metrics = self.valider.multi_task_test(model=self.net, npy_file = os.path.join(self.out_path, 'pred_{}.npy'.format(epoch)))
         
-        if self.config['save_valid_records'] and self.txtfile is not None:
-            file_obj = open(self.txtfile, 'a')
-            file_obj.write('valid metric1 {}, valid metric2 {}\n'.format(metrics[0], metrics[1]))
-            file_obj.close()
+        file_obj = open(self.txtfile, 'a')
+        file_obj.write('validation {} {}, validation {} {}\n'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
+        file_obj.close()
 
-        print('\t Validation | metric1 {}, metric2 {}'.format(metrics[0], metrics[1]))
+        print('\t Validation | {} {}, {} {}'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
         return metrics[0], metrics[1]
 
-    def _test(self, model_file=None, model=None):
+    def _test(self, model_file=None, model=None, metric_name1=None, metric_name2=None):
         self.net.eval()
-        if self.npyfile is not None:
-            metrics = self.tester.multi_task_test(model=self.net, npy_file = self.npyfile + '.npy')
-        else:
-            metrics = self.tester.multi_task_test(model=self.net)
+        metrics = self.tester.multi_task_test(model=self.net, npy_file = os.path.join(self.out_path,  'pred.npy'))
 
-        if self.txtfile is not None:
-            file_obj = open(self.txtfile, 'a')
-            file_obj.write('test mean metric1 {}, test mean metric2 {}\n'.format(metrics[0], metrics[1]))
-            file_obj.write('test metric1 of all tasks {}\n'.format(metrics[2]))
-            file_obj.write('test metric2 of all tasks {}\n'.format(metrics[3]))
-            file_obj.close()
+        file_obj = open(self.txtfile, 'a')
+        file_obj.write('test {} {}, test {} {}\n'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
+        file_obj.close()
         
-        print('\t Test | metric1 {}, metric2 {}'.format(metrics[0], metrics[1]))
+        print('\t Test | {} {}, {} {}'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
         return metrics[0], metrics[1], metrics[2], metrics[3]
 
-    def save_ckpt(self, epoch, save_pth):
+    def save_ckpt(self, epoch):
         net_dict = self.net.state_dict()
         checkpoint = {
             "net": net_dict,
             'optimizer': self.optim.state_dict(),
             "epoch": epoch,
         }
-        torch.save(checkpoint, '{}_{}_ckpt.pth'.format(save_pth, epoch))
+        torch.save(checkpoint, os.path.join(self.out_path, 'ckpt_{}.pth'.format(epoch)))
 
-    def load_ckpt(self, save_pth):
-        checkpoint = torch.load(save_pth)
+    def load_ckpt(self, load_pth):
+        checkpoint = torch.load(load_pth)
         self.net.load_state_dict(checkpoint['net'])
         self.optim.load_state_dict(checkpoint['optimizer'])
         self.start_epoch = checkpoint['epoch'] + 1
 
-    def train(self, save_pth=None):
+    def train(self):
         epoches, save_model = self.config['epoches'], self.config['save_model']
         print("Initializing Training...")
         self.optim.zero_grad()
         
         if self.config['net']['param']['task'] == 'reg':
             best_metric1, best_metric2 = 1000, 1000
+            metric_name1, metric_name2 = 'mae', 'rmse'
         else:
             best_metric1, best_metric2 = 0, 0
+            metric_name1, metric_name2 = 'prc_auc', 'roc_auc'
             
         for i in range(self.start_epoch, epoches+1):
             print("Epoch {} ...".format(i))
             self._train_loss(self.trainloader)
-            metric1, metric2 = self._valid(i)
-            if save_pth is not None:
-                if save_model == 'best_valid':
-                    if (self.config['net']['param']['task'] == 'reg' and (best_metric2 > metric2)) or (self.config['net']['param']['task'] == 'cls' and (best_metric2 < metric2)):
-                        print('saving model...')
-                        best_metric1, best_metric2 = metric1, metric2
-                        if self.config['use_gpu']:
-                            self.net.module.save_model(save_pth+'.pth')
-                        else:
-                            self.net.save_model(save_pth+'.pth')
-                elif save_model == 'each':
+            metric1, metric2 = self._valid(i, metric_name1, metric_name2)
+            if save_model == 'best_valid':
+                if (self.config['net']['param']['task'] == 'reg' and (best_metric2 > metric2)) or (self.config['net']['param']['task'] == 'cls' and (best_metric2 < metric2)):
                     print('saving model...')
+                    best_metric1, best_metric2 = metric1, metric2
                     if self.config['use_gpu']:
-                        self.net.module.save_model(save_pth+'_{}.pth'.format(i))
+                        self.net.module.save_model(os.path.join(self.out_path, 'model.pth'))
                     else:
-                        self.net.save_model(save_pth+'_{}.pth'.format(i))
+                        self.net.save_model(os.path.join(self.out_pth, 'model.pth'))
+            elif save_model == 'each':
+                print('saving model...')
+                if self.config['use_gpu']:
+                    self.net.module.save_model(os.path.join(self.out_path, 'model_{}.pth'.format(i)))
+                else:
+                    self.net.save_model(os.path.join(self.out_path, 'model_{}.pth'.format(i)))
             
             if i % self.config['save_ckpt'] == 0:
-                self.save_ckpt(i, save_pth)
+                self.save_ckpt(i)
 
         if save_model == 'best_valid':
-            return self._test(model_file=save_pth+'.pth')
+            return self._test(model_file=os.path.join(self.out_path, 'model.pth'), metric_name1=metric_name1, metric_name2=metric_name2)
         elif save_model == 'last':
             if self.config['use_gpu']:
-                self.net.module.save_model(save_pth+'.pth')
+                self.net.module.save_model(os.path.join(self.out_path, 'model.pth'))
             else:
-                self.net.save_model(save_pth+'.pth')
-            return self._test(model=self.net)
+                self.net.save_model(os.path.join(self.out_path, 'model.pth'))
+            return self._test(model=self.net, metric_name1=metric_name1, metric_name2=metric_name2)
 
-        
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--trainfile', type=str, help='path to the training file for pretrain')
+    parser.add_argument('--validfile', type=str, default=None, help='path to the validation file for pretrain')
+    parser.add_argument('--testfile', type=str, default=None, help='path to the test file for pretrain')
+    parser.add_argument('--splitfile', type=str, default=None, help='path to the split file for train')
+    parser.add_argument('--gpu_ids', type=str, default=None, help='which gpus to use, one or multiple')
+    parser.add_argument('--out_path', type=str, help='path to store outputs')
+
+    args = parser.parse_args()
+
+    confs = __import__('config.train_config', fromlist=['conf_trainer', 'conf_tester'])
+    conf_trainer, conf_tester = confs.conf_trainer, confs.conf_tester
+
+    if len(args.gpu_ids) > 0:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
+        conf_trainer['use_gpu'] = True
+        conf_tester['use_gpu'] = True
+    else:
+        conf_trainer['use_gpu'] = False
+        conf_tester['use_gpu'] = False
+
+    root_path = args.out_path
+    txtfile = os.path.join(root_path, 'record.txt')
+    if not os.path.isdir(root_path):
+        os.mkdir(root_path)
+
+    trainer = Trainer(conf_trainer, conf_tester, out_path=args.out_path, trainfile=args.trainfile, validfile=args.validfile, testfile=args.testfile, splitfile=args.splitfile)
+    trainer.train()

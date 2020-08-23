@@ -25,17 +25,17 @@ def load_bert_model(bert_model, model_pth):
 
 
 class BERTChem_TAR(nn.Module):
-    def __init__(self, task='cls', n_out=1, vocab_size=70, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, embed=['pos'], activation='gelu', use_att=False, seq_len=512):
+    def __init__(self, task='cls', n_out=1, vocab_size=70, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, embed=['pos'], activation='gelu', seq_len=512):
         super().__init__()
         self.bert = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, embed, activation, seq_len)
         if task == 'cls':
             self.pred = nn.Sequential(
-                Chem_TAR(self.bert.hidden, n_out, use_att),
+                Chem_TAR(self.bert.hidden, n_out),
                 nn.Sigmoid()
             )
         elif task == 'reg':
             self.pred = nn.Sequential(
-                Chem_TAR(self.bert.hidden, n_out, use_att)
+                Chem_TAR(self.bert.hidden, n_out)
             )
 
     def forward(self, x):
@@ -68,23 +68,12 @@ class BERTChem_TAR(nn.Module):
 
 
 class Chem_TAR(nn.Module):
-    def __init__(self, hidden, n_out, use_att=False):
+    def __init__(self, hidden, n_out):
         super().__init__()
-        if use_att:
-            self.att = nn.Sequential(
-                nn.Linear(hidden, hidden, bias=True),
-                nn.Tanh(),
-                nn.Linear(hidden, 1, bias=False),
-                nn.Softmax(dim=1)
-            )
         self.linear = nn.Linear(hidden, n_out, bias=True)
 
     def forward(self, x):
-        if hasattr(self, 'att'):
-            att_score = self.att(x)
-            feature = (x * att_score).sum(dim=1)
-        else:
-            feature = x[:,0]
+        feature = x[:,0]
         return self.linear(feature)
 
 
