@@ -228,9 +228,10 @@ class Trainer():
         self.net.eval()
         metrics = self.valider.multi_task_test(model=self.net, npy_file = os.path.join(self.out_path, 'pred_{}.npy'.format(epoch)))
         
-        file_obj = open(self.txtfile, 'a')
-        file_obj.write('validation {} {}, validation {} {}\n'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
-        file_obj.close()
+        if self.config['save_valid_records']:
+            file_obj = open(self.txtfile, 'a')
+            file_obj.write('validation {} {}, validation {} {}\n'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
+            file_obj.close()
 
         print('\t Validation | {} {}, {} {}'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
         return metrics[0], metrics[1]

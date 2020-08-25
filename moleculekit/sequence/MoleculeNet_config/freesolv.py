@@ -21,9 +21,9 @@
 conf_data_io = {}
 conf_data_io['split'] = 'random'
 conf_data_io['split_ratio'] = [0.8,0.1]
-conf_data_io['seed'] = 122
+conf_data_io['seed'] = 122 #123, 124
 conf_data_io['smile_id'] = 0
-conf_data_io['label_id'] = list(range(1,13))
+conf_data_io['label_id'] = list(range(1,2))
 
 ######################################################################################################################
 # Settings for BERT network
@@ -37,7 +37,7 @@ conf_data_io['label_id'] = list(range(1,13))
 ######################################################################################################################
 conf_net = {}
 conf_net['type'] = 'bert_tar'
-conf_net['param'] = {'task':'reg', 'n_out':12, 'hidden':1024, 'n_layers':6, 'attn_heads':4, 'dropout':0.1, 'activation':'gelu'}
+conf_net['param'] = {'task':'reg', 'n_out':1, 'hidden':1024, 'n_layers':6, 'attn_heads':4, 'dropout':0.1, 'activation':'gelu'}
 
 ######################################################################################################################
 # Setting for optimizer
@@ -97,8 +97,8 @@ conf_trainer['net'] = conf_net
 ##                              performance will be saved
 ## 'save_valid_records': if it is True, then the validation result will be recorded in each epoch
 ######################################################################################################################
-conf_trainer['epoches'] = 300
-conf_trainer['batch_size'] = 128
+conf_trainer['epoches'] = 200
+conf_trainer['batch_size'] = 32
 conf_trainer['seq_max_len'] = None
 conf_trainer['verbose'] = 1
 conf_trainer['save_ckpt'] = 5
@@ -119,7 +119,7 @@ conf_trainer['save_valid_records'] = False
 conf_tester = {}
 conf_tester['loss'] = conf_loss
 conf_tester['net'] = conf_net
-conf_tester['batch_size'] =64
+conf_tester['batch_size'] =32
 conf_tester['task'] = 'reg'
 conf_tester['use_aug'] = True
 conf_tester['use_cls_token'] = True

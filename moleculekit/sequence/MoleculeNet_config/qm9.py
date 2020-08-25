@@ -21,7 +21,7 @@
 conf_data_io = {}
 conf_data_io['split'] = 'random'
 conf_data_io['split_ratio'] = [0.8,0.1]
-conf_data_io['seed'] = 122
+conf_data_io['seed'] = 122 #123, 124
 conf_data_io['smile_id'] = 0
 conf_data_io['label_id'] = list(range(1,13))
 

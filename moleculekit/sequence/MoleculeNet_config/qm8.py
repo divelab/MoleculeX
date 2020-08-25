@@ -21,7 +21,7 @@
 conf_data_io = {}
 conf_data_io['split'] = 'random'
 conf_data_io['split_ratio'] = [0.8,0.1]
-conf_data_io['seed'] = 122
+conf_data_io['seed'] = 122 #123, 124
 conf_data_io['smile_id'] = 0
 conf_data_io['label_id'] = list(range(1,13))
 
@@ -46,7 +46,7 @@ conf_net['param'] = {'task':'reg', 'n_out':12, 'hidden':1024, 'n_layers':6, 'att
 ######################################################################################################################
 conf_optim = {}
 conf_optim['type'] = 'adam'
-conf_optim['param'] = {'betas':(0.9,0.999), 'weight_decay':0, 'lr': 2e-5}
+conf_optim['param'] = {'betas':(0.9,0.999), 'weight_decay':0, 'lr': 5e-5}
 
 ######################################################################################################################
 # Setting for loss function
