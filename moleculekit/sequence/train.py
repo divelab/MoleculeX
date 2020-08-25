@@ -151,7 +151,7 @@ class Trainer():
             raise ValueError('not supported network model!')
     
     def _get_loss_fn(self):
-        type, param = self.config['loss']['type'], self.config['loss']['param']
+        type = self.config['loss']
         if type == 'bce':
             return bce_loss(use_gpu=self.config['use_gpu'])
         elif type == 'wb_bce':

@@ -13,7 +13,7 @@ class BERTEmbedding(nn.Module):
         sum of all these features are output of BERTEmbedding
     """
 
-    def __init__(self, vocab_size, embed_size, embed_type=['pos'], dropout=0.1, seq_len=512):
+    def __init__(self, vocab_size, embed_size, dropout=0.1, seq_len=512):
         """
         :param vocab_size: total vocab size
         :param embed_size: embedding size of token embedding
@@ -21,10 +21,7 @@ class BERTEmbedding(nn.Module):
         """
         super().__init__()
         self.token = TokenEmbedding(vocab_size=vocab_size, embed_size=embed_size)
-        if 'pos' in embed_type:
-            self.position = PositionalEmbedding(d_model=self.token.embedding_dim, max_len=seq_len)
-        if 'seg' in embed_type:
-            self.segment = SegmentEmbedding(embed_size=self.token.embedding_dim)
+        self.position = PositionalEmbedding(d_model=self.token.embedding_dim, max_len=seq_len)
         self.norm = nn.LayerNorm(embed_size)
         self.dropout = nn.Dropout(p=dropout)
         self.embed_size = embed_size
@@ -32,10 +29,7 @@ class BERTEmbedding(nn.Module):
     # def forward(self, sequence, segment_label):
     def forward(self, sequence, segment_label=None):
         x = self.token(sequence)
-        if hasattr(self, 'position'): 
-            x += self.position(sequence)
-        if hasattr(self, 'segment') and segment_label is not None:    
-            x += self.segment(segment_label)
+        x += self.position(sequence)
         return self.dropout(self.norm(x))
 
 
@@ -66,11 +60,3 @@ class PositionalEmbedding(nn.Module):
 
     def forward(self, x):
         return self.pe[:, :x.size(1)]
-
-
-class SegmentEmbedding(nn.Embedding):
-    def __init__(self, embed_size=512):
-        super().__init__(3, embed_size, padding_idx=0)
-
-
-

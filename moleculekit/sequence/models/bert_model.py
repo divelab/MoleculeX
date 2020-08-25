@@ -25,9 +25,9 @@ def load_bert_model(bert_model, model_pth):
 
 
 class BERTChem_TAR(nn.Module):
-    def __init__(self, task='cls', n_out=1, vocab_size=70, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, embed=['pos'], activation='gelu', seq_len=512):
+    def __init__(self, task='cls', n_out=1, vocab_size=70, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, activation='gelu', seq_len=512):
         super().__init__()
-        self.bert = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, embed, activation, seq_len)
+        self.bert = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, activation, seq_len)
         if task == 'cls':
             self.pred = nn.Sequential(
                 Chem_TAR(self.bert.hidden, n_out),
@@ -78,9 +78,9 @@ class Chem_TAR(nn.Module):
 
 
 class BERTChem_Mask(nn.Module):
-    def __init__(self, vocab_size, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, embed=['pos'], activation='gelu', seq_len=512):
+    def __init__(self, vocab_size, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, activation='gelu', seq_len=512):
         super().__init__()
-        self.bert = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, embed, activation, seq_len)
+        self.bert = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, activation, seq_len)
         self.mask_chem = MaskedChem(self.bert.hidden, vocab_size)
 
     def forward(self, x):
@@ -114,9 +114,9 @@ class MaskedChem(nn.Module):
 
 
 class Con_atom(nn.Module):
-    def __init__(self, vocab_size, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, embed=['pos'], activation='gelu', seq_len=512):
+    def __init__(self, vocab_size, hidden=768, n_layers=12, attn_heads=12, dropout=0.1, activation='gelu', seq_len=512):
         super(Con_atom, self).__init__()
-        self.encoder = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, embed, activation, seq_len)
+        self.encoder = BERT(vocab_size, hidden, n_layers, attn_heads, dropout, activation, seq_len)
 
     def save_feat_net(self, save_pth):
         save_bert_model(self.encoder, save_pth)
