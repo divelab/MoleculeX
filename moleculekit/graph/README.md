@@ -1,15 +1,21 @@
 # Grpah-based Method
 In thie directory, we provide the implementation of our graph-based method for molecular property prediction.
 
-## Run
-* Convert original SMILES string to Pytorch Geometric Data type. For example,
+## Make prediction using our reproducible trained models
+Just load our trained model and make prediction. An example is avaliable in 'scripts/predict.sh':
 ```linux
-python tran_data.py --dataset=qm8
+bash ./script/predict.sh
 ```
 
-* Train and evaluate our graph-based model. For example,
+## Train our model from scratch
+* Step 1: Convert original SMILES string to Pytorch Geometric Data type. An example is avaliable in 'scripts/tran_data.sh':
 ```linux
-CUDA_VISIBLE_DEVICES=0 python main.py
+bash ./script/tran_data.sh
+```
+
+* Step 2: Train and evaluate our graph-based model. An example is avaliable in 'scripts/train.sh':
+```linux
+bash ./script/train.sh
 ```
 
 
