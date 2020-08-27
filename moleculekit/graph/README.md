@@ -1,5 +1,5 @@
 # Grpah-based Method
-In thie directory, we provide the implementation of our graph-based method for molecular property prediction.
+In this directory, we provide the implementation of our graph-based method for molecular property prediction.
 
 ## Make prediction using our reproducible trained models
 Just load our trained model and make prediction. An example is avaliable in 'scripts/predict.sh':
