@@ -1,6 +1,13 @@
 # Grpah-based Method
 In this directory, we provide the implementation of our graph-based method for molecular property prediction.
 
+## Environment setup
+Please make sure [Anaconda] is installed firstly. Then
+```linux
+conda env create -f graph.yaml
+source activate graph
+```
+
 ## Make prediction using our reproducible trained models
 Just load our trained model and make prediction. An example is avaliable in 'scripts/predict.sh':
 ```linux
