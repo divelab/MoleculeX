@@ -1,0 +1,28 @@
+name: graph
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pandas=1.0.5=py37h0da4684_0
+  - pillow=7.1.2=py37h718be6c_0
+  - pip=20.1.1=py37_1
+  - python=3.7.7=hcff3b4d_5
+  - rdkit=2020.03.3=py37hdd87690_0
+  - pip:
+    - networkx==2.4
+    - numpy==1.19.0
+    - scikit-learn==0.23.1
+    - scipy==1.5.0
+    - tensorboard==2.2.2
+    - tensorboard-plugin-wit==1.7.0
+    - tensorboardx==2.0
+    - texttable==1.6.2
+    - torch==1.4.0+cu100
+    - torch-cluster==1.5.4
+    - torch-geometric==1.6.0
+    - torch-scatter==2.0.4
+    - torch-sparse==0.6.1
+    - torch-spline-conv==1.2.0
+    - tqdm==4.46.1
+
+
