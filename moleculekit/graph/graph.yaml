@@ -3,11 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - pandas=1.0.5=py37h0da4684_0
-  - pillow=7.1.2=py37h718be6c_0
-  - pip=20.1.1=py37_1
-  - python=3.7.7=hcff3b4d_5
-  - rdkit=2020.03.3=py37hdd87690_0
+  - pandas=1.0.5
+  - pillow=7.1.2
+  - pip=20.1.1
+  - python=3.7.7
+  - rdkit=2020.03.3
   - pip:
     - networkx==2.4
     - numpy==1.19.0
@@ -17,7 +17,7 @@ dependencies:
     - tensorboard-plugin-wit==1.7.0
     - tensorboardx==2.0
     - texttable==1.6.2
-    - torch==1.4.0+cu100
+    - torch==1.4.0
     - torch-cluster==1.5.4
     - torch-geometric==1.6.0
     - torch-scatter==2.0.4
