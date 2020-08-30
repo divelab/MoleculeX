@@ -6,84 +6,9 @@ from models import *
 import csv
 import random
 from data import *
+from evaluate import Tester
 import argparse
 import os
-
-
-
-class Tester():
-    def __init__(self, smile_list, label_list, conf_tester):
-        self.config = conf_tester
-        self.smile_list = smile_list
-        self.label_list = label_list
-        self.labels = np.array(label_list)
-
-    def _get_net(self, vocab_size=70, seq_len=512):
-        type, param = self.config['net']['type'], self.config['net']['param']
-        if type == 'gru_att':
-            return GRU_ATT(vocab_size=vocab_size, **param)
-        elif type == 'bert_tar':
-            return BERTChem_TAR(vocab_size=vocab_size, seq_len=seq_len, **param)
-        else:
-            raise ValueError('not supported network model!')
-
-    def _infer(self, testloader, model=None, model_file=None):
-        assert  ((model is None) and (model_file is not None)) or ((model is not None) and (model_file is None))
-        if model_file is not None:
-            model = self._get_net(vocab_size=testloader.dataset.vocab_size, seq_len=testloader.dataset.seq_len)
-            model.load_model(model_file)
-            if self.config['use_gpu']:
-                model = torch.nn.DataParallel(model)
-                model = model.to('cuda')
-        preds = []
-        model.eval()       
-        for data in testloader:
-            seq_inputs, lengths = data['seq_input'], data['length']
-            if self.config['use_gpu']:
-                seq_inputs, lengths = seq_inputs.to('cuda'), lengths.to('cuda')
-            if self.config['net']['type'] in ['gru_att']:
-                outs = model(seq_inputs, lengths)
-            elif self.config['net']['type'] in ['bert_tar']:
-                outs = model(seq_inputs)
-            if self.config['use_gpu']:
-                outs = outs.to('cpu')
-            pred = outs.detach().numpy()
-            preds.append(pred)
-        
-        return np.concatenate(preds, axis=0)
-
-    def multi_task_evaluate(self, preds):
-        metrics1, metrics2 = [], []
-        if self.config['task'] == 'cls':
-            for i in range(preds.shape[1]):
-                metric1, metric2 = compute_cls_metric(self.labels[:,i], preds[:,i])
-                if metric1 is not None:
-                    metrics1.append(metric1)
-                    metrics2.append(metric2)
-        elif self.config['task'] == 'reg':
-            for i in range(preds.shape[1]):
-                metric1, metric2 = compute_reg_metric(self.labels[:,i], preds[:,i])
-                metrics1.append(metric1)
-                metrics2.append(metric2)
-        return np.mean(metrics1), np.mean(metrics2), metrics1, metrics2
-
-    def multi_task_test(self, model_file=None, model=None, n_aug=4, npy_file=None):
-        batch_size, use_cls_token, use_aug = self.config['batch_size'], self.config['use_cls_token'], self.config['use_aug']
-        testset = TargetSet(self.smile_list, self.label_list, use_aug, use_cls_token)
-        testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
-        if use_aug:
-            multi_preds = []
-            for i in range(n_aug):
-                pred_probs = self._infer(testloader, model=model, model_file=model_file)
-                multi_preds.append(pred_probs)
-            preds = np.mean(np.stack(multi_preds, axis=0), axis=0)
-        else:
-            preds = self._infer(testloader, model=model, model_file=model_file)
-        if npy_file is not None:
-            with open(npy_file, 'wb') as f:
-                np.save(f, preds)
-        mean_metric1, mean_metric2, metrics1, metrics2 = self.multi_task_evaluate(preds)
-        return mean_metric1, mean_metric2, metrics1, metrics2
 
 
 
