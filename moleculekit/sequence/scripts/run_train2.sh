@@ -9,4 +9,4 @@ test=None
 ## path to store output results
 out='qm8_out'
 
-python train.py --trainfile $train --validfile $valid --testfile $test --gpu_ids  $gpus --out_path $out
+python src/train.py --trainfile $train --validfile $valid --testfile $test --gpu_ids  $gpus --out_path $out

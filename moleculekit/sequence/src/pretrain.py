@@ -9,6 +9,7 @@ import random
 from data import *
 import argparse
 import os
+import sys
 
 
 
@@ -285,6 +286,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    sys.path.append('.')
     confs = __import__('config.pretrain_config', fromlist=['conf_trainer', 'conf_tester'])
     conf_trainer, conf_tester = confs.conf_trainer, confs.conf_tester
 

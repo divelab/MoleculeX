@@ -9,6 +9,7 @@ from data import *
 from evaluate import Tester
 import argparse
 import os
+import sys
 
 
 
@@ -129,11 +130,11 @@ class Trainer():
             elif self.config['net']['type'] in ['bert_tar']:
                 outputs = self.net(seq_inputs)
 
-            if self.config['loss']['type'] in ['bce', 'wb_bce', 'focal']:
+            if self.config['loss'] in ['bce', 'wb_bce']:
                 loss = self.criterion(outputs, labels)
-            elif self.config['loss']['type'] in ['mse']:
+            elif self.config['loss'] in ['mse']:
                 loss = self.criterion(outputs, labels) / outputs.shape[0]
-            elif self.config['loss']['type'] in ['mask_bce']:
+            elif self.config['loss'] in ['mask_bce']:
                 mask = data_batch['mask']
                 if self.config['use_gpu']:
                     mask = mask.to('cuda')
@@ -243,6 +244,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    sys.path.append('.')
     confs = __import__('config.train_config', fromlist=['conf_trainer', 'conf_tester'])
     conf_trainer, conf_tester = confs.conf_trainer, confs.conf_tester
 
