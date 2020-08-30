@@ -1,14 +1,20 @@
-# BERT Networks for Molecule Property Prediction
+# Sequence-based Method
 ## System Requirements
 - numpy
 - scikit-learn
 - pytorch >= 1.4.0
 - rdkit
-## Usage
-### Download code
+
+If you have installed [Anaconda](https://www.anaconda.com/), you can execute the following commands to install and activate the environment:
 ```
-git clone https://github.com/divelab/MoleculeKit
-cd MoleculeKit/moleculekit/sequence
+conda env create -f sequence.yaml
+source activate sequence
+```
+## Usage
+### Reproduce our results with our trained model on MoleculeNet
+Download our trained models from [this link](). Specify gpu id, dataset name, seed for random split (122, 123, 124) and model path in scripts/run_reproduce.sh. Then execute it:
+```
+bash scripts/run_reproduce.sh
 ```
 ### Pretrain
 In this code, we implement two pretrain tasks for downstream molecule property prediction task:
@@ -22,7 +28,7 @@ If you want to do pretraining by yourself, you can firstly modify the configurat
 bash scripts/run_pretrain.sh
 ```
 ### Property prediction
-To do molecule property prediction, firstly download our provided pretrained model from [this link](https://drive.google.com/drive/folders/1auvkx5e-3OI9kUeH8CjVm8e9R1kLgz5H?usp=sharing), then modify the configuration file /config/train_config.py following the instruction. Execute different training scripts for different way to preprocess data:
+To do molecule property prediction on your own dataset, firstly download our provided pretrained model from [this link](https://drive.google.com/drive/folders/1auvkx5e-3OI9kUeH8CjVm8e9R1kLgz5H?usp=sharing), then modify the configuration file /config/train_config.py following the instruction. Execute different training scripts for different way to preprocess data:
 - If you provide a .csv data file containing training, validation and test datasets all together and a .pkl split id file (stores three python list denoting the id list of training, validation and test separately), then modify variables in scripts/run_train1.sh, and execute it
 ```
 bash scripts/run_train1.sh
@@ -37,4 +43,9 @@ bash scripts/run_train3.sh
 ```
 During training, a folder with the same name as the $out variable in the training script will be created, and all the output results (model parameters as .pth files, validation and test result recorded in record.txt .etc) will be automatically saved under this folder.
 
-To reproduce our results of MoleculeNet datasets, you can copy the content of the corresponding configuration file under the MoleculeNet_config folder to config/train_config.py. 
+To reproduce our trained models of MoleculeNet datasets, you can copy the content of the corresponding configuration file under the config/MoleculeNet_config folder to config/train_config.py. 
+
+After training is completed, models will be saved under your specified output folder. Then modify variables in scripts/run_evaluate.sh, and execute it
+```
+bash scripts/run_evaluate.sh
+```

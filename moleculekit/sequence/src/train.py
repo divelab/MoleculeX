@@ -162,17 +162,6 @@ class Trainer():
         print('\t Validation | {} {}, {} {}'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
         return metrics[0], metrics[1]
 
-    def _test(self, model_file=None, model=None, metric_name1=None, metric_name2=None):
-        self.net.eval()
-        metrics = self.tester.multi_task_test(model=self.net, npy_file = os.path.join(self.out_path,  'pred.npy'))
-
-        file_obj = open(self.txtfile, 'a')
-        file_obj.write('test {} {}, test {} {}\n'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
-        file_obj.close()
-        
-        print('\t Test | {} {}, {} {}'.format(metric_name1, metrics[0], metric_name2, metrics[1]))
-        return metrics[0], metrics[1], metrics[2], metrics[3]
-
     def save_ckpt(self, epoch):
         net_dict = self.net.state_dict()
         checkpoint = {
@@ -221,15 +210,6 @@ class Trainer():
             
             if i % self.config['save_ckpt'] == 0:
                 self.save_ckpt(i)
-
-        if save_model == 'best_valid':
-            return self._test(model_file=os.path.join(self.out_path, 'model.pth'), metric_name1=metric_name1, metric_name2=metric_name2)
-        elif save_model == 'last':
-            if self.config['use_gpu']:
-                self.net.module.save_model(os.path.join(self.out_path, 'model.pth'))
-            else:
-                self.net.save_model(os.path.join(self.out_path, 'model.pth'))
-            return self._test(model=self.net, metric_name1=metric_name1, metric_name2=metric_name2)
 
 
 

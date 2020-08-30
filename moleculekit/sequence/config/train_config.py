@@ -107,7 +107,7 @@ conf_trainer['use_aug'] = True
 conf_trainer['use_cls_token'] = True
 conf_trainer['pretrain_model'] = None# 'pretrain_model/mask_con.pth'
 conf_trainer['save_model'] = 'best_valid'
-conf_trainer['save_valid_records'] = False
+conf_trainer['save_valid_records'] = True
 
 ######################################################################################################################
 # Other settings for validation/test
