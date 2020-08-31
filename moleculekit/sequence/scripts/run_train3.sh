@@ -1,7 +1,7 @@
 ## gpu id
 gpus="2,3,4"
 ## path to your data file
-file='examples/qm8.csv'
+file='../datasets/moleculenet/qm8.csv'
 ## path to store output results
 out='qm8_out'
 
