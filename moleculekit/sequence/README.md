@@ -2,8 +2,8 @@
 ## System Requirements
 - numpy
 - scikit-learn
-- pytorch >= 1.4.0
-- rdkit
+- pytorch = 1.4.0
+- rdkit = 2018.09.1
 
 If you have installed [Anaconda](https://www.anaconda.com/), you can execute the following commands to install and activate the environment:
 ```
@@ -12,10 +12,11 @@ source activate sequence
 ```
 ## Usage
 ### Reproduce our results with our trained model on MoleculeNet
-Download our trained models from [this link](). Specify gpu id, dataset name, seed for random split (122, 123, 124) and model path in scripts/run_reproduce.sh. Then execute it:
+Download our trained models from [this link](https://drive.google.com/drive/folders/1mmYvDaYLnAwACNS52rVaBkmIlUgBHEmc?usp=sharing). Specify gpu id, dataset name, seed for random split (122, 123, 124) and model path in scripts/run_reproduce.sh. Then execute it:
 ```
 bash scripts/run_reproduce.sh
 ```
+Notice that we use test-time augmentation, so the reproduced results may not be exactly the same as, but very close to those reported in our paper.
 ### Pretrain
 In this code, we implement two pretrain tasks for downstream molecule property prediction task:
 - Mask prediction task, that is predicting the ids of masked tokens in a sequence, which is just the same pretrain task used in [original BERT paper](https://arxiv.org/abs/1810.04805).
