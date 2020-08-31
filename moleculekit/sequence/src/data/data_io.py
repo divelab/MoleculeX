@@ -6,31 +6,33 @@ import csv
 import pickle
 
 
-def read_split_data(smilefile, smile_id=None, label_id=None, split_mode=None, split_file=None, split_ratios=[], seed=123):
+def read_data(smilefile):
+    fp = open(smilefile, 'r')
+    smile_list = []
+    for smile in fp:
+        smile = smile.strip()
+        smile_list.append(smile)
+    fp.close()
+    return smile_list
+
+
+def read_split_data(smilefile, split_mode=None, split_file=None, split_ratios=[], seed=123):
     smile_list = []
     label_list = []
 
-    if smile_id is not None:
-        with open(smilefile) as f:
-            reader = csv.DictReader(f)
-            columns = reader.fieldnames
-            for row in reader:
-                smile = row[columns[smile_id]]
-                smile_list.append(smile)
-                if label_id is not None:
-                    label = []
-                    for id in label_id:
-                        if len(row[columns[id]]) > 0:
-                            label.append(float(row[columns[id]]))
-                        else:
-                            label.append(None)
-                    label_list.append(label)
-    else:
-        with open(smilefile) as f:
-            s = f.readline()[:-1]
-            while s:
-                smile_list.append(s)
-                s = f.readline()[:-1]
+    with open(smilefile) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            smile = row['smiles']
+            smile_list.append(smile)
+            label = []
+            for y in row.keys():
+                if y != 'id' and y != 'smiles' and y != 'mol_id':
+                    if len(row[y]) > 0:
+                        label.append(float(row[y]))
+                    else:
+                        label.append(None)
+            label_list.append(label)
 
     if split_file is not None:
         with open(split_file, 'rb') as f:

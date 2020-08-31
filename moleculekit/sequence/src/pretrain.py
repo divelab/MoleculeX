@@ -124,9 +124,9 @@ class PreTrainer():
         self.out_path = out_path
         self.config = conf_trainer
 
-        train_smile, train_label = read_split_data(trainfile)
-        valid_smile, valid_label = read_split_data(validfile)
-        test_smile, test_label = read_split_data(testfile)
+        train_smile = read_data(trainfile)
+        valid_smile = read_data(validfile)
+        test_smile = read_data(testfile)
 
         batch_size, task, seq_max_len = self.config['batch_size'], self.config['pretrain_task'], self.config['seq_max_len']
         use_aug, use_cls_token = self.config['use_aug'], self.config['use_cls_token']

@@ -50,9 +50,8 @@ if __name__ == '__main__':
     else:
         conf_tester['use_gpu'] = False
     
-    smile_id, label_id = smile_ids[args.dataset], label_ids[args.dataset]
     testfile, splitfile = get_data_files(args.dataset, args.seed)
-    _, _, _, _, test_smile, test_label = read_split_data(testfile, smile_id, label_id, split_file=splitfile)
+    _, _, _, _, test_smile, test_label = read_split_data(testfile, split_file=splitfile)
 
     tester = Tester(test_smile, test_label, conf_tester)
     metric1, metric2, _, _ = tester.multi_task_test(model_file=args.modelfile)
