@@ -79,23 +79,31 @@ class Tester():
         if npy_file is not None:
             with open(npy_file, 'wb') as f:
                 np.save(f, preds)
-        mean_metric1, mean_metric2, metrics1, metrics2 = self.multi_task_evaluate(preds)
-        return mean_metric1, mean_metric2, metrics1, metrics2
+
+        if self.label_list is not None:
+            mean_metric1, mean_metric2, metrics1, metrics2 = self.multi_task_evaluate(preds)
+            return mean_metric1, mean_metric2, metrics1, metrics2
+        else:
+            return preds
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--testfile', type=str, help='path to the test file for pretrain')
+    parser.add_argument('--split_mode', type=str, default='random', help=' split methods, use random, stratified or scaffold')
+    parser.add_argument('--split_train_ratio', type=float, default=0.8, help='the ratio of data for training set')
+    parser.add_argument('--split_valid_ratio', type=float, default=0.1, help='the ratio of data for validation set')
+    parser.add_argument('--split_seed', type=int, default=122, help='random seed for split, use 122, 123 or 124')
+    parser.add_argument('--split_ready', action='store_true', default=False, help='specify it to be true if you provide three files for train/val/test')
     parser.add_argument('--modelfile', type=str, help='path to the saved model file')
-    parser.add_argument('--splitfile', type=str, default=None, help='path to the split file for train')
     parser.add_argument('--gpu_ids', type=str, default=None, help='which gpus to use, one or multiple')
     
     args = parser.parse_args()
 
     sys.path.append('.')
     confs = __import__('config.train_config', fromlist=['conf_trainer', 'conf_tester'])
-    conf_tester, conf_data_io = confs.conf_tester, confs.conf_data_io
+    conf_tester = confs.conf_tester
 
     if len(args.gpu_ids) > 0:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
@@ -103,11 +111,10 @@ if __name__ == '__main__':
     else:
         conf_tester['use_gpu'] = False
 
-    smile_id, label_id = conf_data_io['smile_id'], conf_data_io['label_id']
-    if args.splitfile is not None:
-        _, _, _, _, test_smile, test_label = read_split_data(args.testfile, smile_id, label_id, split_file=args.splitfile)
+    if not args.split_ready:
+        _, _, _, _, test_smile, test_label = read_split_data(args.testfile, split_mode=args.split_mode, split_ratios=[args.split_train_ratio, args.split_valid_ratio], seed=args.split_seed)
     else:
-        test_smile, test_label = read_split_data(args.testfile, smile_id, label_id)
+        test_smile, test_label = read_split_data(args.testfile)
     
     tester = Tester(test_smile, test_label, conf_tester)
     metric1, metric2, _, _ = tester.multi_task_test(model_file=args.modelfile)
