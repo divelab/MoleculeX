@@ -34,11 +34,11 @@ To do molecule property prediction on your own dataset, firstly download our pro
 ```
 bash scripts/run_train1.sh
 ```
-- If you provide three .csv data file for training, validation and test datasets separately, then modify variables in scripts/run_train2.sh, and execute it
+- If you provide three .csv data files for training, validation and test datasets separately, then modify variables in scripts/run_train2.sh, and execute it
 ```
 bash scripts/run_train2.sh
 ```
-- If you solely provide a .csv data files containing training, validation and test datasets all together without a split file, you need to choose one split method from our implemented three split methods (random split, stratified split or scaffold split, read [MoleculeNet paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5868307/) for details), and modify conf_data_io parameter in /config/train_config.py. Then modify variables in scripts/run_train3.sh, and execute it
+- If you solely provide a .csv data file containing training, validation and test datasets all together without a split file, you need to choose one split method from our implemented three split methods (random split, stratified split or scaffold split, read [MoleculeNet paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5868307/) for details), and modify conf_data_io parameter in /config/train_config.py. Then modify variables in scripts/run_train3.sh, and execute it
 ```
 bash scripts/run_train3.sh
 ```
