@@ -6,26 +6,6 @@
 """
 
 ######################################################################################################################
-# Settings for data io
-## We require the data file has the same form as datasets/qm8.csv, with one column for smile strings and other columns for labels
-## e.g. For datasets/qm8.csv, the first column stores all smile strings while the other 12 columns store labels, so to read datasets/qm8.csv,
-##          so setting conf_data_io['smile_id'] = 0, conf_data_io['label_id'] = list(range(1,13))
-## You have three ways to do train/valid/test split:
-## 1. provide a singe data file and split id file,
-## 2. provide three data files for train/valid/test set separately, 
-## 3. choose one of three split methods 'random', 'stratified' or 'scaffold', in this case,
-##     'split' is the split methods, 'random', 'stratified' or 'scaffold'
-##     'split_ratio' is used for the ratio of split, e.g. [0.8, 0.1] means we split 80% of data as training, 10% as valid and the remaining 10% as test
-##     'seed' is used as the random seed for split.
-######################################################################################################################
-conf_data_io = {}
-conf_data_io['split'] = 'random'
-conf_data_io['split_ratio'] = [0.8,0.1]
-conf_data_io['seed'] = 122
-conf_data_io['smile_id'] = 0
-conf_data_io['label_id'] = list(range(1,13))
-
-######################################################################################################################
 # Settings for BERT network
 ## task: 'reg' for regression and 'cls' for classification
 ## n_out: number of outputs, it is the same as the number of labels of each training sample, or number of tasks
@@ -76,7 +56,6 @@ conf_lr_scheduler['type'] = None
 conf_lr_scheduler['param'] = None
 
 conf_trainer = {}
-conf_trainer['data_io'] = conf_data_io
 conf_trainer['optim'] = conf_optim
 conf_trainer['loss'] = conf_loss
 conf_trainer['lr_scheduler'] = conf_lr_scheduler
@@ -127,4 +106,3 @@ conf_tester['use_cls_token'] = True
 assert conf_optim['type'] in ['adam', 'rms', 'sgd']
 assert conf_lr_scheduler['type'] in ['cos', 'linear', 'square', None]
 assert conf_net['param']['task'] == conf_tester['task']
-assert len(conf_data_io['label_id']) == conf_net['param']['n_out']

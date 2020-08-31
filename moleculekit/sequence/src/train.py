@@ -14,42 +14,18 @@ import sys
 
 
 class Trainer():
-    def __init__(self, conf_trainer, conf_tester, out_path, trainfile, splitfile=None, validfile=None, testfile=None):
+    def __init__(self, conf_trainer, conf_tester, out_path, train_smile, train_label, valid_smile, valid_label):
         self.txtfile = os.path.join(out_path, 'record.txt')
         self.out_path = out_path
         self.config = conf_trainer
 
-        smile_id, label_id = self.config['data_io']['smile_id'], self.config['data_io']['label_id']
-        split_mode, split_ratio, seed = self.config['data_io']['split'], self.config['data_io']['split_ratio'], self.config['data_io']['seed']
-        if splitfile is not None:
-            train_smile, train_label, valid_smile, valid_label, test_smile, test_label = read_split_data(trainfile, smile_id, label_id, split_file=splitfile)
-        elif validfile is not None and testfile is not None:
-            train_smile, train_label = read_split_data(trainfile, smile_id, label_id)
-            valid_smile, valid_label = read_split_data(validfile, smile_id, label_id)
-            test_smile, test_label = read_split_data(testfile, smile_id, label_id)
-        elif testfile is not None:
-            assert len(split_ratio) == 1
-            train_smile, train_label, valid_smile, valid_label = read_split_data(trainfile, smile_id, label_id, split_mode=split_mode, split_ratios=split_ratio, seed=seed)
-            test_smile, test_label = read_split_data(testfile, smile_id, label_id)
-        else:
-            if len(split_ratio) == 2:
-                train_smile, train_label, valid_smile, valid_label, test_smile, test_label = read_split_data(trainfile, smile_id, label_id, split_mode=split_mode, split_ratios=split_ratio, seed=seed)
-            elif len(split_ratio) == 1:
-                train_smile, train_label, test_smile, test_label = read_split_data(trainfile, smile_id, label_id, split_mode=split_mode, split_ratios=split_ratio, seed=seed)
-                valid_smile, valid_label = [], []
-
         batch_size, seq_max_len, use_aug, use_cls_token = self.config['batch_size'], self.config['seq_max_len'], self.config['use_aug'], self.config['use_cls_token']
         self.trainset = TargetSet(train_smile, train_label, use_aug, use_cls_token, seq_max_len)
         self.trainloader = DataLoader(self.trainset, batch_size=batch_size, shuffle=True, num_workers=0)
-        if len(valid_smile) > 0:
-            self.valider = Tester(valid_smile, valid_label, conf_tester)
-        else:
-            self.valider = Tester(test_smile, test_label, conf_tester)
-        self.tester = Tester(test_smile, test_label, conf_tester)
+        self.valider = Tester(valid_smile, valid_label, conf_tester)
 
         seq_lens1 = np.max([len(x) for x in valid_smile])+80
-        seq_lens2 = np.max([len(x) for x in test_smile])+80
-        seq_len = max(self.trainset.seq_len, max(seq_lens1, seq_lens2))
+        seq_len = max(self.trainset.seq_len, seq_lens1)
         self.net = self._get_net(self.trainset.vocab_size, seq_len=seq_len)
         if self.config['use_gpu']:
             self.net = torch.nn.DataParallel(self.net)
@@ -217,13 +193,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainfile', type=str, help='path to the training file for pretrain')
     parser.add_argument('--validfile', type=str, default=None, help='path to the validation file for pretrain')
-    parser.add_argument('--testfile', type=str, default=None, help='path to the test file for pretrain')
-    parser.add_argument('--splitfile', type=str, default=None, help='path to the split file for train')
+    parser.add_argument('--split_mode', type=str, default='random', help=' split methods, use random, stratified or scaffold')
+    parser.add_argument('--split_train_ratio', type=float, default=0.8, help='the ratio of data for training set')
+    parser.add_argument('--split_valid_ratio', type=float, default=0.1, help='the ratio of data for validation set')
+    parser.add_argument('--split_seed', type=int, default=122, help='random seed for split, use 122, 123 or 124')
+    parser.add_argument('--split_ready', action='store_true', default=False, help='specify it to be true if you provide three files for train/val/test')
     parser.add_argument('--gpu_ids', type=str, default=None, help='which gpus to use, one or multiple')
     parser.add_argument('--out_path', type=str, help='path to store outputs')
 
     args = parser.parse_args()
-
+    
     sys.path.append('.')
     confs = __import__('config.train_config', fromlist=['conf_trainer', 'conf_tester'])
     conf_trainer, conf_tester = confs.conf_trainer, confs.conf_tester
@@ -241,5 +220,11 @@ if __name__ == '__main__':
     if not os.path.isdir(root_path):
         os.mkdir(root_path)
 
-    trainer = Trainer(conf_trainer, conf_tester, out_path=args.out_path, trainfile=args.trainfile, validfile=args.validfile, testfile=args.testfile, splitfile=args.splitfile)
+    if not args.split_ready:
+        train_smile, train_label, valid_smile, valid_label, _, _ = read_split_data(args.trainfile, split_mode=args.split_mode, split_ratios=[args.split_train_ratio, args.split_valid_ratio], seed=args.split_seed)
+    else:
+        train_smile, train_label = read_split_data(args.trainfile)
+        valid_smile, valid_label = read_split_data(args.validfile)
+
+    trainer = Trainer(conf_trainer, conf_tester, args.out_path, train_smile, train_label, valid_smile, valid_label)
     trainer.train()
