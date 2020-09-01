@@ -10,6 +10,7 @@ If you have installed [Anaconda](https://www.anaconda.com/), you can execute the
 conda env create -f sequence.yaml
 source activate sequence
 ```
+Notice: the cudatoolkit version is 10.0.130 in sequence.yaml, if the cuda version is different in your machine, change the cudatoolkit version in sequence.yaml before installing it.
 ## Usage
 ### Reproduce our results with our trained model on MoleculeNet
 Download our trained models from [this link](https://drive.google.com/drive/folders/1mmYvDaYLnAwACNS52rVaBkmIlUgBHEmc?usp=sharing). Specify gpu id, dataset name, seed for random split (122, 123, 124) and model path in scripts/run_reproduce.sh. Then execute it:
@@ -29,24 +30,37 @@ If you want to do pretraining by yourself, you can firstly modify the configurat
 bash scripts/run_pretrain.sh
 ```
 ### Property prediction
-To do molecule property prediction on your own dataset, firstly download our provided pretrained model from [this link](https://drive.google.com/drive/folders/1auvkx5e-3OI9kUeH8CjVm8e9R1kLgz5H?usp=sharing), then modify the configuration file /config/train_config.py following the instruction. Execute different training scripts for different way to preprocess data:
-- If you provide a .csv data file containing training, validation and test datasets all together and a .pkl split id file (stores three python list denoting the id list of training, validation and test separately), then modify variables in scripts/run_train1.sh, and execute it
+To do molecule property prediction on your own dataset, firstly download our provided pretrained model from [this link](https://drive.google.com/drive/folders/1auvkx5e-3OI9kUeH8CjVm8e9R1kLgz5H?usp=sharing), then modify the configuration file /config/train_config.py following the instruction. Execute different scripts for different ways to split training, validation and test set.
+#### **case 1**
+If you provide three .csv data files for training, validation and test datasets separately, then specify the path to your training data file, the path to your validation data file, gpu ids and the directory to store your output results in scripts/run_train1.sh, and execute it
 ```
 bash scripts/run_train1.sh
 ```
-- If you provide three .csv data files for training, validation and test datasets separately, then modify variables in scripts/run_train2.sh, and execute it
+After training finalized, specify the path to your test data file, gpu ids and the path to your stored model file in scripts/run_evaluate1.sh, and execute it
+```
+bash scripts/run_evaluate1.sh
+```
+If you do not have labels for test data, you can run scripts/run_predict1.sh for prediction. The prediction result will be saved as a prediction.npy file in your specified directory.
+```
+bash scripts/run_predict1.sh
+```
+
+#### **case2**
+If you solely provide a .csv data file containing training, validation and test datasets all together , you need to choose one split method from our implemented three split methods (random split, stratified split or scaffold split, read [MoleculeNet paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5868307/) for details). Specify the path to your data file, gpu ids, split method, split ratio and split seed in scripts/run_train2.sh, and execute it
 ```
 bash scripts/run_train2.sh
 ```
-- If you solely provide a .csv data file containing training, validation and test datasets all together without a split file, you need to choose one split method from our implemented three split methods (random split, stratified split or scaffold split, read [MoleculeNet paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5868307/) for details), and modify conf_data_io parameter in /config/train_config.py. Then modify variables in scripts/run_train3.sh, and execute it
+Then do evaluation using scripts/run_evaluate2.sh
 ```
-bash scripts/run_train3.sh
+bash scripts/run_evaluate2.sh
 ```
+or do prediction using scripts/run_predict2.sh
+```
+bash scripts/run_predict2.sh
+```
+
 During training, a folder with the same name as the $out variable in the training script will be created, and all the output results (model parameters as .pth files, validation result recorded in record.txt .etc) will be automatically saved under this folder.
 
 To reproduce our trained models of MoleculeNet datasets, you can copy the content of the corresponding configuration file under the config/MoleculeNet_config folder into config/train_config.py. 
 
-After training is completed, models will be saved under your specified output folder. Then to do evaluation on test set, modify variables in scripts/run_evaluate.sh, and execute it.
-```
-bash scripts/run_evaluate.sh
-```
+Notice: **Your data file must be csv files, where one column with the key 'smiles' stores all smile strings and the other columns store property.**

@@ -14,7 +14,10 @@ class TargetSet(Dataset):
         self.vocab_size = len(self.char_indices)
         print("dictionary size: " + str(len(self.char_indices)))
 
-        self.labels = np.array(label_list)
+        if label_list is not None:
+            self.labels = np.array(label_list)
+        else:
+            self.labels = np.zeros([len(smile_list),1])
         self.mol_list, smile_len_max = self._read_mol(smile_list)
         self.corpus_lines = len(self.mol_list)
 

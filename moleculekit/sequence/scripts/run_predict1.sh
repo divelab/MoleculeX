@@ -4,7 +4,7 @@ gpus="2,3,4"
 file='path/to/your/test/data/test.csv'
 ##path to your saved model file
 model='path/to/your/saved/model'
-##path to save prediction
+##path to save prediction.npy
 out='out'
 
 python src/predict.py --split_ready --testfile $file --modelfile $model --gpu_ids  $gpus --out_path $out

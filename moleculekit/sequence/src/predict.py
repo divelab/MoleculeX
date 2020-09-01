@@ -5,6 +5,7 @@ import argparse
 import sys
 import os
 from evaluate import Tester
+from data import *
 
 
 if __name__ == '__main__':

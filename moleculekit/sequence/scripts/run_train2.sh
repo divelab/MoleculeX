@@ -7,8 +7,9 @@ out='out'
 ## split method
 mode='random'
 ## split ratio
-train_ratio=0.8
-valid_ratio=0.1
+train_ratio=0.8 #The ratio for training set
+valid_ratio=0.1 #The ratio for validation set
+#The data except for training and validation is test set
 ##split random seed
 seed=122
 
