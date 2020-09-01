@@ -5,18 +5,6 @@ Configuration file
 
 
 conf = {}
-######################################################################################################################
-# Settings for data io
-## Note that we need to convert original data (SMILES) to Pytorch Geometric data object before we run main.py
-##    'dataset' is the dataset name
-##    'split' is the split methods: 'random', 'stratified' or 'scaffold'
-##    'split_ratio' is used for the ratio of split: e.g. [0.8, 0.1, 0.1] means we split 80% of data as training, 10% as valid and the remaining 10% as test
-##    'seed' is used as the random seed for random split.
-######################################################################################################################
-conf['split'] = 'scaffold'
-conf['split_ratio'] = [0.8,0.1,0.1]
-conf['seed'] = 122
-
 
 
 
