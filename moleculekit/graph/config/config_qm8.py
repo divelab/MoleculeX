@@ -15,9 +15,9 @@ conf = {}
 ##    'graph_level_feature': if it is true, we combine the 200-d feature extracted by rkdit with the representation output by network together, and the use the combined representation to do property prediction.
 ######################################################################################################################
 conf['model'] = 'ml2'
-conf['task_type'] = 'classification'
-conf['metric'] = 'roc'
-conf['num_tasks'] = 1
+conf['task_type'] = 'regression'
+conf['metric'] = 'mae'
+conf['num_tasks'] = 12
 conf['graph_level_feature'] = True
 
 
