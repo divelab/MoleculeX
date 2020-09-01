@@ -6,6 +6,19 @@ Configuration file
 
 conf = {}
 
+######################################################################################################################
+# Settings for experimental setup
+##    'model' chooses model from 'ml2' and 'ml3': ml2 is the proposed hierachical message passing model; ml3 is the model without subgraph-level representations, compared to ml2.
+##    'task_type': 'regression' or 'classification'.
+##    'metric' is the evaluation method: 'mae', 'rmse', 'prc', 'roc'
+##    'num_tasks' denotes how many tasks we have in choosed dataset.
+##    'graph_level_feature': if it is true, we combine the 200-d feature extracted by rkdit with the representation output by network together, and the use the combined representation to do property prediction.
+######################################################################################################################
+conf['model'] = 'ml2'
+conf['task_type'] = 'classification'
+conf['metric'] = 'roc'
+conf['num_tasks'] = 1
+conf['graph_level_feature'] = True
 
 
 ######################################################################################################################
