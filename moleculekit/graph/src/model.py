@@ -4,7 +4,6 @@ import torch.nn.functional as F
 from torch_scatter import scatter_mean, scatter_softmax, scatter_add, scatter_sum
 from torch_geometric.nn import MessagePassing, GCNConv, NNConv, GINConv
 from torch_geometric.utils import degree
-from ogb.graphproppred.mol_encoder import AtomEncoder,BondEncoder
 
 import numpy as np
     
