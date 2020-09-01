@@ -1,7 +1,9 @@
 #!/bin/sh
-'''
-An example script used to transform original data (SMILES) to PytorchGeometric Data
-'''
+### An example script used to transform original data (SMILES) to PytorchGeometric Data
+
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+
 GPU=0
 
 echo "=====Tansform data for qm8====="
