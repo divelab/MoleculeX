@@ -35,3 +35,4 @@ bash ./scripts/tran_data.sh
 bash ./scripts/train.sh
 ```
 
+Note: if you want run your own datasets, you need to firstly creat a 'config_YourDatasetName.py' under './config/'. A defualt configuration can be found at './config/config_defaul.py'
