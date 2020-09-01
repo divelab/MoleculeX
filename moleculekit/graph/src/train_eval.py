@@ -15,7 +15,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ### This is run function for classification tasks
 def run_classification(train_dataset, val_dataset, test_dataset, model, num_tasks, epochs, batch_size, vt_batch_size, lr,
-        lr_decay_factor, lr_decay_step_size, weight_decay, early_stopping, metric, log_dir, save_dir):
+        lr_decay_factor, lr_decay_step_size, weight_decay, early_stopping, metric, log_dir, save_dir, evaluate):
 
     model = model.to(device)
     optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -31,11 +31,13 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
     
     writer = None
     if log_dir is not None:
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
         log_dir = os.path.join(log_dir)
         writer = SummaryWriter(log_dir=log_dir)
     
     if not os.path.exists(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
     
     save_dir = os.path.join(save_dir, 'params.ckpt') 
     
@@ -106,17 +108,19 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
     print('======================')    
     print('Stop training at epoch:', epoch, '; Best val metric before this epoch is:', best_val_metric, '; Best val metric achieves at epoch:', epoch_bvl)       
     print('======================') 
-    print('Loading trained medel and testing...')
-    model.load_state_dict(torch.load(save_dir))
-    test_prc_results, test_roc_results = test_classification(model, test_loader, num_tasks, device)
     
-    
-    print('======================')        
-    print('Epoch: {:03d}, Test PRC (avg over multitasks): {:.4f}, Test ROC (avg over multitasks): {:.4f}'.format(epoch_bvl, np.mean(test_prc_results), np.mean(test_roc_results)))
-    print('======================')
-    print('Test PRC for all tasks:', test_prc_results)
-    print('Test ROC for all tasks:', test_roc_results)
-    print('======================')
+    if evaluate:
+        print('Loading trained medel and testing...')
+        model.load_state_dict(torch.load(save_dir))
+        test_prc_results, test_roc_results = test_classification(model, test_loader, num_tasks, device)
+
+
+        print('======================')        
+        print('Epoch: {:03d}, Test PRC (avg over multitasks): {:.4f}, Test ROC (avg over multitasks): {:.4f}'.format(epoch_bvl, np.mean(test_prc_results), np.mean(test_roc_results)))
+        print('======================')
+        print('Test PRC for all tasks:', test_prc_results)
+        print('Test ROC for all tasks:', test_roc_results)
+        print('======================')
 
 
     
@@ -194,7 +198,7 @@ def test_classification(model, test_loader, num_tasks, device):
 
 ### This is run function for regression tasks
 def run_regression(train_dataset, val_dataset, test_dataset, model, num_tasks, epochs, batch_size, vt_batch_size, lr,
-        lr_decay_factor, lr_decay_step_size, weight_decay, early_stopping, metric, log_dir, save_dir):
+        lr_decay_factor, lr_decay_step_size, weight_decay, early_stopping, metric, log_dir, save_dir, evaluate):
 
     model = model.to(device)
     optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -210,12 +214,14 @@ def run_regression(train_dataset, val_dataset, test_dataset, model, num_tasks, e
     
     writer = None
     if log_dir is not None:
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
         log_dir = os.path.join(log_dir)
         writer = SummaryWriter(log_dir=log_dir)
     
     
     if not os.path.exists(save_dir):
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
     save_dir = os.path.join(save_dir, 'params.ckpt')  
     
     for epoch in range(1, epochs + 1):
@@ -276,23 +282,25 @@ def run_regression(train_dataset, val_dataset, test_dataset, model, num_tasks, e
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr_decay_factor * param_group['lr']
     
+        
+    if writer is not None:
+        writer.close() 
+    
     print('======================')    
     print('Stop training at epoch:', epoch, '; Best val metric before this epoch is:', best_val_metric, '; Best val metric achieves at epoch:', epoch_bvl)       
     print('======================') 
-    print('Loading trained medel and testing...')
-    model.load_state_dict(torch.load(save_dir))
-    test_mae_results, test_rmse_results = test_regression(model, test_loader, num_tasks, device)
     
-    
-    if writer is not None:
-        writer.close() 
-       
-    print('======================')        
-    print('Epoch: {:03d}, Test MAE (avg over multitasks): {:.4f}, Test RMSE (avg over multitasks): {:.4f}'.format(epoch_bvl, np.mean(test_mae_results), np.mean(test_rmse_results)))
-    print('======================')
-    print('Test MAE for all tasks:', test_mae_results)
-    print('Test RMSE for all tasks:', test_rmse_results)
-    print('======================')
+    if evaluate:
+        print('Loading trained medel and testing...')
+        model.load_state_dict(torch.load(save_dir))
+        test_mae_results, test_rmse_results = test_regression(model, test_loader, num_tasks, device)
+
+        print('======================')        
+        print('Epoch: {:03d}, Test MAE (avg over multitasks): {:.4f}, Test RMSE (avg over multitasks): {:.4f}'.format(epoch_bvl, np.mean(test_mae_results), np.mean(test_rmse_results)))
+        print('======================')
+        print('Test MAE for all tasks:', test_mae_results)
+        print('Test RMSE for all tasks:', test_rmse_results)
+        print('======================')
     
     
 

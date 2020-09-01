@@ -18,39 +18,29 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser()
 ### Dataset name
-parser.add_argument('--dataset', type=str, default="qm8")
-### Directory of original data (SMILES) 
-parser.add_argument('--ori_dataset_path', type=str, default="../../datasets/moleculenet/")
-### Directory of the processed data (Pytroch Geometric Data)
-parser.add_argument('--pro_dataset_path', type=str, default="../../datasets/moleculenet_pro/")
-### Directory of the trained model
-parser.add_argument('--model_dir', type=str, default='../trained_models/your_model/')
-### If set as true, save prediction result
-parser.add_argument('--save_pred', type=bool, default=False)
-### Directory to save prediction result
-parser.add_argument('--save_result_dir', type=str, default='../prediction_results/')
+parser.add_argument('--dataset', type=str, default="qm8", help='dataset name')
+
+### If split ready is True, use (1); Otherwise, use (2).###
+parser.add_argument('--split_ready', action='store_true', default=False, help='specify it to be true if you provide three files for train/val/test')
+####################################################################
+
+### (1) The following arguments are used when split_ready==False.###
+parser.add_argument('--testfile', type=str, help='path to the preprocessed test file (Pytorch Geometric Data)')
+####################################################################
+
+### (2) The following arguments are used when split_ready==True.###
+parser.add_argument('--ori_dataset_path', type=str, default="../../datasets/moleculenet/", help='directory of the original csv file (SMILES string)')
+parser.add_argument('--pro_dataset_path', type=str, default="../../datasets/moleculenet_pro/", help='directory of the preprocessed data (Pytorch Geometric Data)')
+parser.add_argument('--split_mode', type=str, default='random', help=' split methods, use random, stratified or scaffold')
+parser.add_argument('--split_train_ratio', type=float, default=0.8, help='the ratio of data for training set')
+parser.add_argument('--split_valid_ratio', type=float, default=0.1, help='the ratio of data for validation set')
+parser.add_argument('--split_seed', type=int, default=122, help='random seed for split, use 122, 123 or 124')
+####################################################################
+
+parser.add_argument('--model_dir', type=str, default='../trained_models/your_model/', help='directory of the trained model')
+parser.add_argument('--save_pred', type=bool, default=False, help='save prediction result or not')
+parser.add_argument('--save_result_dir', type=str, default='../prediction_results/', help='derectory to save prediction results')
 args = parser.parse_args()
-
-
-
-# parser = argparse.ArgumentParser()
-
-# parser.add_argument('--model', type=str, default="ml2")
-# parser.add_argument('--task_type', type=str, default="regression")
-# parser.add_argument('--dataset', type=str, default="qm8")
-# parser.add_argument('--split_rule', type=str, default="random")
-# parser.add_argument('--seed', type=int, default=122) 
-# parser.add_argument('--num_tasks', type=int, default=12)
-# parser.add_argument('--model_dir', type=str, default=None)
-# parser.add_argument('--batch_size', type=int, default=1000)
-# parser.add_argument('--graph_level_feature', type=bool, default=False)
-# parser.add_argument('--subgraph_level_feature', type=bool, default=True)
-# parser.add_argument('--hidden', type=int, default=256)
-# parser.add_argument('--dropout', type=float, default=0)
-# parser.add_argument('--depth', type=int, default=3)
-# parser.add_argument('--save_pred', type=bool, default=False)
-
-# args = parser.parse_args()
 
 
 
@@ -90,14 +80,14 @@ def test_classification(model, test_loader, num_tasks, device):
     if torch.cuda.is_available():
         if args.save_pred:
             if not os.path.exists(args.save_result_dir):
-                os.mkdir(args.save_result_dir)
-            np.save(args.save_result_dir+'/'+args.dataset+'_seed_'+str(conf['seed'])+'.npy', preds.cpu().detach().numpy())
+                os.makedirs(args.save_result_dir)
+            np.save(args.save_result_dir+'/'+args.dataset+'.npy', preds.cpu().detach().numpy())
         prc_results, roc_results = compute_cla_metric(targets.cpu().detach().numpy(), preds.cpu().detach().numpy(), num_tasks)
     else:
         if args.save_pred:
             if not os.path.exists(args.save_result_dir):
-                os.mkdir(args.save_result_dir)
-            np.save(args.save_result_dir+'/'+args.dataset+'_seed_'+str(conf['seed'])+'.npy', preds)
+                os.makedirs(args.save_result_dir)
+            np.save(args.save_result_dir+'/'+args.dataset+'.npy', preds)
         prc_results, roc_results = compute_cla_metric(targets, preds, num_tasks)
     
     return prc_results, roc_results
@@ -122,27 +112,36 @@ def test_regression(model, test_loader, num_tasks, device):
     if torch.cuda.is_available():
         if args.save_pred:
             if not os.path.exists(args.save_result_dir):
-                os.mkdir(args.save_result_dir)
-            np.save(args.save_result_dir+'/'+args.dataset+'_seed_'+str(conf['seed'])+'.npy', preds.cpu().detach().numpy())
+                os.makedirs(args.save_result_dir)
+            np.save(args.save_result_dir+'/'+args.dataset+'.npy', preds.cpu().detach().numpy())
         mae_results, rmse_results = compute_reg_metric(targets.cpu().detach().numpy(), preds.cpu().detach().numpy(), num_tasks)
     else:
         if args.save_pred:
             if not os.path.exists(args.save_result_dir):
-                os.mkdir(args.save_result_dir)
-            np.save(args.save_result_dir+'/'+args.dataset+'_seed_'+str(conf['seed'])+'.npy', preds)
+                os.makedirs(args.save_result_dir)
+            np.save(args.save_result_dir+'/'+args.dataset+'.npy', preds)
         mae_results, rmse_results = compute_reg_metric(targets, preds, num_tasks)
     return mae_results, rmse_results
 
 
 
 ### Load dataset
-dataset, num_node_features, num_edge_features, num_graph_features = get_dataset(args.pro_dataset_path, args.dataset, conf['graph_level_feature'])
+if not args.split_ready:
+    dataset, num_node_features, num_edge_features, num_graph_features = get_dataset(args.pro_dataset_path, args.dataset, conf['graph_level_feature'])
+    assert conf['num_tasks'] == dataset[0].y.shape[-1]
+    train_dataset, val_dataset, test_dataset = split_data(args.ori_dataset_path, args.dataset, dataset, args.split_mode, args.split_seed, split_size=[args.split_train_ratio, args.split_valid_ratio, 1.0-args.split_train_ratio-args.split_valid_ratio])
+else:
+    test_dataset = torch.load(testfile)
+    num_node_features = train_dataset[0].x.size(1)
+    num_edge_features = train_dataset[-1].edge_attr.size(1)
+    num_graph_features = None
+    if graph_level_feature:
+        num_graph_features = train_dataset[0].graph_attr.size(-1)
 print("======================================")
-print("=====Total number of graphs in", args.dataset,":", len(dataset), "=====")
-assert conf['num_tasks'] == dataset[0].y.shape[-1]
-train_dataset, val_dataset, test_dataset = split_data(args.ori_dataset_path, args.dataset, dataset, conf['split'], conf['seed'], split_size=conf['split_ratio'])
-print('======================') 
-print("=====Total number of graphs in test set of", args.dataset ,":", len(test_dataset), "=====")
+print("=====Total number of test graphs in", args.dataset,":", len(test_dataset), "=====")
+print("======================================")
+
+
 test_loader = DataLoader(test_dataset, conf['batch_size'], shuffle=False)
 
 ### Choose model
