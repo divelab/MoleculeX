@@ -2,11 +2,21 @@
 In this directory, we provide the implementation of our graph-based method for molecular property prediction.
 
 ## Environment setup
-Please make sure [Anaconda] is installed firstly. Then
+* If you use CUDA10.0, you can easily setup the environment using the provided yaml file. Please make sure [Anaconda](https://www.anaconda.com) is installed firstly. Then you can execute the following commands one by one to install and activate the environment.
 ```linux
 conda env create -f graph.yaml
-source activate graph
+source activate graph  (or conda activate graph)
+pip install torch-scatter==latest+cu100 -f https://pytorch-geometric.com/whl/torch-1.4.0.html
+pip install torch-sparse==latest+cu100 -f https://pytorch-geometric.com/whl/torch-1.4.0.html
+pip install torch-cluster==latest+cu100 -f https://pytorch-geometric.com/whl/torch-1.4.0.html
+pip install torch-spline-conv==latest+cu100 -f https://pytorch-geometric.com/whl/torch-1.4.0.html
+pip install torch-geometric
 ```
+
+* If you use other CUDA version, you can setup the environment manually. The versions of key packages we used are listed as follows. Note that the versions of PyTorch and PyTorch Geometric should be compatible and PyTorch Geometric is related to other packages, which should be compatible with your CUDA version. It would be easy to install PyTorch Geometric correctly by following the [installation instruction](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html#).  
+    * PyTorch 1.4.0
+    * PyTorch Geometric 1.6.0
+    * RDKit 2020.03.3
 
 ## Make prediction using our reproducible trained models
 Just load our trained model and make prediction. An example is avaliable in 'scripts/predict.sh':
@@ -24,10 +34,4 @@ bash ./scripts/tran_data.sh
 ```linux
 bash ./scripts/train.sh
 ```
-
-
-## Our environment
-* PyTorch 1.4.0
-* PyTorch Geometric 1.6.0
-* RDKit 2020.03.3
 
