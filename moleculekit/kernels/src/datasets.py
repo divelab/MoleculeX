@@ -10,7 +10,7 @@ def get_splitted(path):
         return None, None
     
     smile_list, label_list = read_data(path)
-    Y = np.array(label_list) if len(label_list[0])>0 else None
+    Y = np.array(label_list).astype('float') if len(label_list[0])>0 else None
     return smile_list, Y
 
 
@@ -22,7 +22,7 @@ def get_dataset(args):
     
     smile_list, label_list = read_data(args['dataset_file'])
     X = np.array(smile_list)
-    Y = np.array(label_list)
+    Y = np.array(label_list).astype('float')
     
     if args['split_file'] is not None:
         logging.info('Splitting index file specified. Use file.')
