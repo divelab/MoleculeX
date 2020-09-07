@@ -12,5 +12,6 @@ dependencies:
   - scipy==1.5.2
   - pip:
     - descriptastorus==2.2.0.3
+    - grakel==0.1b7
     - pandas-flavor==0.2.0
   
