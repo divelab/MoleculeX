@@ -106,27 +106,8 @@ class SubgraphModel_ml2(torch.nn.Module):
          node_info = self.mlp2(node_info)  ### Step 4
          out = torch.cat([node_info, x_clique, out, u[tree_batch]], dim=1)
          return self.subgraph_mlp(out)  ### Step 5
-    
-    
-    
-class SubgraphModel_ml2(torch.nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, dropout):
-        super(SubgraphModel_ml2, self).__init__()
-        self.subgraph_mlp_1 = MLP(hidden_dim, hidden_dim, hidden_dim, dropout, F.relu)
-        self.subgraph_mlp_2 = MLP(hidden_dim, hidden_dim, hidden_dim, dropout, F.relu)
-        self.subgraph_mlp_3 = MLP(input_dim, hidden_dim, output_dim, dropout, F.relu)
-       
+   
 
-    def forward(self, x, x_clique, tree_edge_index, atom2clique_index, u, tree_batch):
-
-        row, col = tree_edge_index
-        out = scatter_sum(x_clique[row], col, dim=0, dim_size=x_clique.size(0)) 
-        out = self.subgraph_mlp_1(out)
-        row_assign, col_assign = atom2clique_index
-        node_info = scatter_sum(x[row_assign], col_assign, dim=0, dim_size=x_clique.size(0))
-        node_info = self.subgraph_mlp_2(node_info)  ### Step 4
-        out = torch.cat([node_info, x_clique, out, u[tree_batch]], dim=1)
-        return self.subgraph_mlp_3(out)  ### Step 5
 
 class GlobalModel_ml2(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, dropout):
