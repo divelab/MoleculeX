@@ -69,13 +69,13 @@ if not args.split_ready:
     assert conf['num_tasks'] == dataset[0].y.shape[-1]
     train_dataset, val_dataset, test_dataset = split_data(args.ori_dataset_path, args.dataset, dataset, args.split_mode, args.split_seed, split_size=[args.split_train_ratio, args.split_valid_ratio, 1.0-args.split_train_ratio-args.split_valid_ratio])
 else:
-    train_dataset = torch.load(trainfile)
-    val_dataset = torch.load(validfile)
-    test_dataset = torch.load(testfile)
+    train_dataset = torch.load(args.trainfile)
+    val_dataset = torch.load(args.validfile)
+    test_dataset = torch.load(args.testfile)
     num_node_features = train_dataset[0].x.size(1)
     num_edge_features = train_dataset[-1].edge_attr.size(1)
     num_graph_features = None
-    if graph_level_feature:
+    if conf['graph_level_feature']:
         num_graph_features = train_dataset[0].graph_attr.size(-1)
 print("======================================")
 print("=====Total number of graphs in", args.dataset,":", len(train_dataset)+len(val_dataset)+len(test_dataset), "=====")
