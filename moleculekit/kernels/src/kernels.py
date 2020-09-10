@@ -38,7 +38,7 @@ class Kernel(object):
                                        base_graph_kernel=base_kernel)]
 
     def fit_transform(self, X_smiles):
-        if self.kernel is list:
+        if type(self.kernel) is list:
             K = sum([k.fit_transform(X_smiles) for k in self.kernel])/len(self.kernel)
         else:
             K = self.kernel.fit_transform(X_smiles)
