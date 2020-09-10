@@ -11,6 +11,8 @@ pip install torch-sparse==latest+cu100 -f https://pytorch-geometric.com/whl/torc
 pip install torch-cluster==latest+cu100 -f https://pytorch-geometric.com/whl/torch-1.4.0.html
 pip install torch-spline-conv==latest+cu100 -f https://pytorch-geometric.com/whl/torch-1.4.0.html
 pip install torch-geometric
+pip install git+https://github.com/bp-kelley/descriptastorus
+pip install pandas_flavor
 ```
 
 * If you use other CUDA version, you can setup the environment manually. The versions of key packages we used are listed as follows. Note that the versions of PyTorch and PyTorch Geometric should be compatible and PyTorch Geometric is related to other packages, which should be compatible with your CUDA version. It would be easy to install PyTorch Geometric correctly by following the [installation instruction](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html#).  
