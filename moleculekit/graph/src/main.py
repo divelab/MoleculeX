@@ -77,6 +77,9 @@ else:
     num_graph_features = None
     if conf['graph_level_feature']:
         num_graph_features = train_dataset[0].graph_attr.size(-1)
+    train_dataset = [JunctionTreeData(**{k: v for k, v in data}) for data in train_dataset]
+    val_dataset = [JunctionTreeData(**{k: v for k, v in data}) for data in val_dataset]
+    test_dataset = [JunctionTreeData(**{k: v for k, v in data}) for data in test_dataset]
 print("======================================")
 print("=====Total number of graphs in", args.dataset,":", len(train_dataset)+len(val_dataset)+len(test_dataset), "=====")
 print("=====Total number of training graphs in", args.dataset,":", len(train_dataset), "=====")
