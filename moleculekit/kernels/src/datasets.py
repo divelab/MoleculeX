@@ -2,7 +2,7 @@ import random, csv, pickle
 import numpy as np
 import rdkit.Chem as Chem
 from rdkit.Chem.Scaffolds import MurckoScaffold
-import logging
+import logging, os
 
 def get_splitted(path):
     
