@@ -10,8 +10,9 @@ def get_splitted(path):
         return None, None
     
     smile_list, label_list = read_data(path)
+    X = np.array(smile_list)
     Y = np.array(label_list).astype('float') if len(label_list[0])>0 else None
-    return smile_list, Y
+    return X, Y
 
 
 def get_dataset(args):
