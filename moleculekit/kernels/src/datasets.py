@@ -52,8 +52,8 @@ def get_dataset(args):
         return X_train, Y_train, X_test, Y_test
     
     elif args['mode']=='train':
-        X_train = X[np.array(train_idx)]
-        Y_train = Y[np.array(train_idx)]
+        X_train = X
+        Y_train = Y
         return X_train, Y_train, None, None
     
     elif args['mode']=='test':
