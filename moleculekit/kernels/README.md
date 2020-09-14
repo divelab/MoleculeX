@@ -92,17 +92,16 @@ The trained model will be automatically named as *[dataset_name]_[seed].pkl* and
   
 #### <a name="config"></a>4. Model configurations (hyper-parameters)
 You can specify the hyper-parameters in the file *src/configs.py*. Make sure the key of your config is the same to the dataset name you specified.
-If the model configurations are not specified, the default setting will be used.
 
 In *src/configs.py*, you can add any number of configs in the form of
 ```
 configs['(YOUR_DATASET_NAME)'] = {
-    "n": 10,
-    "lambda": 1,
-    "n_iters": 3,
-    "norm": False,
-    "base_k": 'subtree'
+    "n": (Integer. Suggest range from 1 to 12),
+    "lambda": (Float. Suggest range from 0.5 to 1.5),
+    "n_iters": (Integer. Suggest range from 1 to 12),
+    "norm": (False/True),
+    "base_k": ('subtree'/'sp')
 }
 ```
-Please replace the key *(YOUR_DATASET_NAME)* by the the name of your dataset.
+Please replace the key *(YOUR_DATASET_NAME)* by the the name of your dataset. If the model configurations are not specified, the default setting will be used.
 
