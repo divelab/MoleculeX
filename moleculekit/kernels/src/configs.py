@@ -1,13 +1,12 @@
 configs = {}
 
-user_config = {
+configs['example_config'] = {
     "n": 10, # Parameter in the subsequence kernel.
     "lambda": 1, # Parameter in the subsequence kernel.
     "n_iters": 3, # Iteration of WL kernel.
     "norm": False, # Whether to normalize kernel.
     "base_k": 'subtree' # Base kernel, choose from subtree, sp
 }
-configs['user_config'] = user_config
 
 
 delaney = {
