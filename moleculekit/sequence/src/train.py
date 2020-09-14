@@ -128,7 +128,7 @@ class Trainer():
 
     def _valid(self, epoch, metric_name1=None, metric_name2=None):
         self.net.eval()
-        metrics = self.valider.multi_task_test(model=self.net, npy_file = os.path.join(self.out_path, 'pred_{}.npy'.format(epoch)))
+        metrics = self.valider.multi_task_test(model=self.net, npy_file = os.path.join(self.out_path))
         
         if self.config['save_valid_records']:
             file_obj = open(self.txtfile, 'a')
@@ -184,8 +184,8 @@ class Trainer():
                 else:
                     self.net.save_model(os.path.join(self.out_path, 'model_{}.pth'.format(i)))
             
-            if i % self.config['save_ckpt'] == 0:
-                self.save_ckpt(i)
+                if i % self.config['save_ckpt'] == 0:
+                    self.save_ckpt(i)
 
 
 
