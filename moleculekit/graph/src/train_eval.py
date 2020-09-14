@@ -110,7 +110,7 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
     print('======================') 
     
     if evaluate:
-        print('Loading trained medel and testing...')
+        print('Loading trained model and testing...')
         model.load_state_dict(torch.load(save_dir))
         test_prc_results, test_roc_results = test_classification(model, test_loader, num_tasks, device)
 
@@ -291,7 +291,7 @@ def run_regression(train_dataset, val_dataset, test_dataset, model, num_tasks, e
     print('======================') 
     
     if evaluate:
-        print('Loading trained medel and testing...')
+        print('Loading trained model and testing...')
         model.load_state_dict(torch.load(save_dir))
         test_mae_results, test_rmse_results = test_regression(model, test_loader, num_tasks, device)
 
