@@ -1,11 +1,13 @@
 # Kernel-based Method
 ## Environment Requirements
 - descriptastorus
+- grake
 - numpy
 - pandas_flavor
 - python <= 3.7.10
 - rdkit
 - scikit-learn <= 0.21.3
+- shogun
 
 
 If you have installed [Anaconda](https://www.anaconda.com/), you can execute the following commands to install and activate the environment:
@@ -18,6 +20,11 @@ source activate kernels
 
 The kernel-based method supports both the sequence kernel (Subsequence-based) and the graph kernel (WL-based). 
 The type of kernel to be used can be specified by the argument **--kernel_type**.
+
+Before running the shell scripts (*.sh* files), you might need to run the following command.
+```
+chmod +x scripts/*.sh
+```
 
 ### To reproduce our results on MoleculeNet
 We provide scripts and configurations for the datasets used in MoleculeNet. For example, run the command below to train and 
@@ -38,24 +45,44 @@ We also provide the trained models for the datasets. To use the trained models a
 Use the commands
 ```
 python ../src/main.py --mode train_eval [--args]
+python ../src/main.py --mode train [--args]
 python ../src/main.py --mode test [--args]
 python ../src/main.py --mode predict [--args]
 ```
 to train, evaluate and predict with your own datasets, where **[--args]** are the additional arguments you need to specify. 
 If an argument is not specified, the default setting will be used.
 
+Explaination of the four modes:
+  - **train_eval**: will run training (with trained model saved to an *.pkl* file) and the evaluation (with prediction saved to an *.npy* file) after training. If a single data file is provided, will split the data for training and evaluation.
+  - **train**: will run training (with trained model saved to an *.pkl* file) only. If a single data file is provided, all data in the file will be used for training.
+  - **test**: will load the tained model and run prediction (saved to an *.npy* file) and evaluation. If a single data file is provided, will split for testing; if splitted *.csv* files are provided, all data in the test file will be used.
+  - **predict**: will load the tained model and run prediction (saved to an *.npy* file). If a single data file is provided, will split for testing; if splitted *.csv* files are provided, all data in the test file will be used.
+
 #### 1. Arguments for dataset loading
 We provide two ways for loading your own data.
   - With a single *[dataset_name].csv* file with all the data for training and testing: in this case, you need to specify the arguments 
-  **--dataset**, **--data_path**, **--seed**, **--split_mode**, **--split_train_ratio** and **--split_valid_ratio**. Then the train-test
-  splitting will be based on the arguments you provided.
+    - **--dataset**: the name of your dataset, should be the same to the name of the data file and the key of your [config](#config), 
+    - **--data_path**: name of the folder where you put your dataset (*.csv*) files, 
+    - **--seed**: the seed for randomly split the train/test data (default: 122), 
+    - **--split_mode**: the split mode: random, stratified or scaffold (default: random), 
+    - **--split_train_ratio** and **--split_valid_ratio**: the ratios of training examples and validation examples (default: 0.8/0.1). 
+    
+    Then the train-test splitting will be based on the above arguments you provided.
+    
   - With splitted *.csv* files for train/val/test: in this case, you need to include **--split_ready** and specify the arguments 
-  **--trainfile**, **--validfile**, **--testfile**.
+    - **--dataset**: the name of your dataset, should be the same to the key of your [config](#config), 
+    - **--trainfile**: path to the *.csv* file that stores the training examples, 
+    - **--validfile**: path to the *.csv* file that stores the validation examples, 
+    - **--testfile**: path to the *.csv* file that stores the testing examples.
   
-All the *.csv* files should include at least the "smiles" column and can contain any number of columns as the labels (ground truths).
+All the *.csv* files must include the "smiles" column and can contain any number of columns as the labels (ground truths).
 
 #### 2. Argument for storing your results
-You can specify the path where you store your trained models and the predictions by specifying **--model_path** and **--prediction_path**.
+You can specify the path where you store your trained models and the predictions by specifying 
+  - **--model_path**: path to the folder where the trained model will be stored,
+  - **--prediction_path**: path to the folder where the prediction results will be stored.
+
+The trained model will be automatically named as *[dataset_name]_[seed].pkl* and the prediction result will be named as *[dataset_name]_seed_[seed].npy*.
 
 #### 3. Other arguments
   - **--kernel_type**: the type of kernel to be used. Can be one of "graph", "sequence" and "combined".
@@ -63,6 +90,19 @@ You can specify the path where you store your trained models and the predictions
   - **--eval_on_valid**: if included, the model will be trained on training set and evaluated on validation set; otherwise (by default), 
   the model will be trained on the training and validation set and evaluated on the test set. Recommend to include when tuning the hyper-parameters.
   
-#### 4. Model configurations (hyper-parameters)
+#### <a name="config"></a>4. Model configurations (hyper-parameters)
 You can specify the hyper-parameters in the file *src/configs.py*. Make sure the key of your config is the same to the dataset name you specified.
 If the model configurations are not specified, the default setting will be used.
+
+In *src/configs.py*, you can add any number of configs in the form of
+```
+configs['(YOUR_DATASET_NAME)'] = {
+    "n": 10,
+    "lambda": 1,
+    "n_iters": 3,
+    "norm": False,
+    "base_k": 'subtree'
+}
+```
+Please replace the key *(YOUR_DATASET_NAME)* by the the name of your dataset.
+
