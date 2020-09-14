@@ -19,13 +19,13 @@ parser.add_argument('--dataset', type=str, default="qm8", help='dataset name')
 parser.add_argument('--split_ready', action='store_true', default=False, help='specify it to be true if you provide three files for train/val/test')
 ####################################################################
 
-### (1) The following arguments are used when split_ready==False.###
+### (1) The following arguments are used when split_ready==True.###
 parser.add_argument('--trainfile', type=str, help='path to the preprocessed training file (Pytorch Geometric Data)')
 parser.add_argument('--validfile', type=str, help='path to the preprocessed validation file (Pytorch Geometric Data)')
 parser.add_argument('--testfile', type=str, help='path to the preprocessed test file (Pytorch Geometric Data)')
 ####################################################################
 
-### (2) The following arguments are used when split_ready==True.###
+### (2) The following arguments are used when split_ready==False.###
 parser.add_argument('--ori_dataset_path', type=str, default="../../datasets/moleculenet/", help='directory of the original csv file (SMILES string)')
 parser.add_argument('--pro_dataset_path', type=str, default="../../datasets/moleculenet_pro/", help='directory of the preprocessed data (Pytorch Geometric Data)')
 parser.add_argument('--split_mode', type=str, default='random', help=' split methods, use random, stratified or scaffold')
