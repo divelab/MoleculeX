@@ -97,7 +97,7 @@ In *src/configs.py*, you can add any number of configs in the form of
 ```
 configs['(YOUR_DATASET_NAME)'] = {
     "n": (Integer. Suggest range from 1 to 12),
-    "lambda": (Float. Suggest range from 0.5 to 1.5),
+    "lambda": (Float. Suggest range from 0.5 to 1.0),
     "n_iters": (Integer. Suggest range from 1 to 12),
     "norm": (False/True),
     "base_k": ('subtree'/'sp')
