@@ -1,4 +1,4 @@
-# Grpah-based Method
+# Graph-based Method
 In this directory, we provide the implementation of our graph-based method for molecular property prediction.
 
 ## Environment setup
@@ -41,4 +41,4 @@ bash ./scripts/tran_data.sh
 bash ./scripts/train.sh
 ```
 
-Note: if you want run your own datasets, you need to firstly creat a 'config_YourDatasetName.py' under './config/'. A defualt configuration can be found at './config/config_defaul.py'
+Note: if you want run your own datasets, you need to firstly create a 'config_YourDatasetName.py' under './config/'. A default configuration can be found at './config/config_default.py'
