@@ -6,5 +6,5 @@ cd "$parent_path"
 
 GPU=0
 
-echo "=====Tansform data for qm8====="
+echo "=====Transform data for qm8====="
 CUDA_VISIBLE_DEVICES=${GPU} python ../src/tran_data.py --dataset=qm8
