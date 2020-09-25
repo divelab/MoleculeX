@@ -21,7 +21,11 @@ pip install pandas_flavor
     * RDKit 2020.03.3
 
 ## Make prediction using our reproducible trained models
-Just load our trained model and make prediction. An example is avaliable in 'scripts/predict.sh':
+* Step 1: Convert original SMILES string to Pytorch Geometric Data type. An example is avaliable in 'scripts/tran_data.sh':
+```linux
+bash ./scripts/tran_data.sh
+```
+* Step 2: Just load our trained model and make prediction. An example is avaliable in 'scripts/predict.sh':
 ```linux
 bash ./scripts/predict.sh
 ```
