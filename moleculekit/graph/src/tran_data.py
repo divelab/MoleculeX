@@ -13,10 +13,7 @@ from torch_geometric.utils import from_networkx, tree_decomposition
 
 import argparse
 
-# Create the moleculenet_pro directory if it does not exist
-moleculenet_pro_path = "../../datasets/moleculenet_pro"
-if not os.path.isdir(moleculenet_pro_path):
-	os.makedirs(moleculenet_pro_path)
+
 
 
 parser = argparse.ArgumentParser()
@@ -251,5 +248,9 @@ networks = [smile_to_graph(smile) for smile in smiles]
 
 graph_set = save_to_data(networks, labels)
 
+
+# Create the directory if it does not exist
+if not os.path.isdir(args.pro_dataset_path):
+	os.makedirs(args.pro_dataset_path)
 
 torch.save(graph_set, args.pro_dataset_path + args.dataset + '.pt')
