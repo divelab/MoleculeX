@@ -1,3 +1,4 @@
+import os
 import csv
 import codecs
 import numpy as np
@@ -12,6 +13,10 @@ from torch_geometric.utils import from_networkx, tree_decomposition
 
 import argparse
 
+# Create the moleculenet_pro directory if it does not exist
+moleculenet_pro_path = "../../datasets/moleculenet_pro"
+if not os.path.isdir(moleculenet_pro_path):
+	os.makedirs(moleculenet_pro_path)
 
 
 parser = argparse.ArgumentParser()
