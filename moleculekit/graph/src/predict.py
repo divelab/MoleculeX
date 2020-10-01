@@ -38,7 +38,7 @@ parser.add_argument('--split_seed', type=int, default=122, help='random seed for
 ####################################################################
 
 parser.add_argument('--model_dir', type=str, default='../trained_models/your_model/', help='directory of the trained model')
-parser.add_argument('--save_pred', type=bool, default=False, help='save prediction result or not')
+parser.add_argument('--save_pred', action='store_true', default=False, help='save prediction result or not')
 parser.add_argument('--save_result_dir', type=str, default='../prediction_results/', help='derectory to save prediction results')
 args = parser.parse_args()
 
