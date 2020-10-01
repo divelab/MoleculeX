@@ -131,12 +131,14 @@ if not args.split_ready:
     assert conf['num_tasks'] == dataset[0].y.shape[-1]
     train_dataset, val_dataset, test_dataset = split_data(args.ori_dataset_path, args.dataset, dataset, args.split_mode, args.split_seed, split_size=[args.split_train_ratio, args.split_valid_ratio, 1.0-args.split_train_ratio-args.split_valid_ratio])
 else:
-    test_dataset = torch.load(testfile)
-    num_node_features = train_dataset[0].x.size(1)
-    num_edge_features = train_dataset[-1].edge_attr.size(1)
+    test_dataset = torch.load(args.testfile)
+    num_node_features = test_dataset[0].x.size(1)
+    num_edge_features = test_dataset[-1].edge_attr.size(1)
     num_graph_features = None
-    if graph_level_feature:
-        num_graph_features = train_dataset[0].graph_attr.size(-1)
+    if conf['graph_level_feature']:
+        num_graph_features = test_dataset[0].graph_attr.size(-1)
+        
+    test_dataset = [JunctionTreeData(**{k: v for k, v in data}) for data in test_dataset]
 print("======================================")
 print("=====Total number of test graphs in", args.dataset,":", len(test_dataset), "=====")
 print("======================================")
