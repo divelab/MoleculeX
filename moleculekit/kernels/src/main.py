@@ -75,9 +75,9 @@ else:
     X_train, Y_train = get_splitted(args['trainfile'])
     X_valid, Y_valid = get_splitted(args['validfile'])
     if X_train is not None and X_valid is not None:
-        X_train = np.concatenate(X_train, X_valid)
+        X_train = np.concatenate([X_train, X_valid])
     if Y_train is not None and Y_valid is not None:
-        Y_train = np.concatenate(Y_train, Y_valid)
+        Y_train = np.concatenate([Y_train, Y_valid])
     X_test, Y_test = get_splitted(args['testfile'])
 
 
