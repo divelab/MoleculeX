@@ -14,6 +14,7 @@ If you have installed [Anaconda](https://www.anaconda.com/), you can execute the
 ```
 conda env create -f kernel.yaml
 source activate kernels
+pip install git+https://github.com/bp-kelley/descriptastorus
 ```
 
 ## Usage
