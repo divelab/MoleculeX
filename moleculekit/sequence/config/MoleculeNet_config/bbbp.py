@@ -22,8 +22,8 @@ conf_data_io = {}
 conf_data_io['split'] = 'scaffold'
 conf_data_io['split_ratio'] = [0.8,0.1]
 conf_data_io['seed'] = 122 #123, 124
-conf_data_io['smile_id'] = 0
-conf_data_io['label_id'] = list(range(1,28))
+conf_data_io['smile_id'] = 1
+conf_data_io['label_id'] = list(range(0,1))
 
 ######################################################################################################################
 # Settings for BERT network
@@ -37,7 +37,7 @@ conf_data_io['label_id'] = list(range(1,28))
 ######################################################################################################################
 conf_net = {}
 conf_net['type'] = 'bert_tar'
-conf_net['param'] = {'task':'cls', 'n_out':27, 'hidden':1024, 'n_layers':6, 'attn_heads':4, 'dropout':0.1, 'activation':'gelu'}
+conf_net['param'] = {'task':'cls', 'n_out':1, 'hidden':1024, 'n_layers':6, 'attn_heads':4, 'dropout':0.1, 'activation':'gelu'}
 
 ######################################################################################################################
 # Setting for optimizer
@@ -46,7 +46,7 @@ conf_net['param'] = {'task':'cls', 'n_out':27, 'hidden':1024, 'n_layers':6, 'att
 ######################################################################################################################
 conf_optim = {}
 conf_optim['type'] = 'adam'
-conf_optim['param'] = {'betas':(0.9,0.999), 'weight_decay':0, 'lr': 2e-5}
+conf_optim['param'] = {'betas':(0.9,0.999), 'weight_decay':0, 'lr': 1e-5}
 
 ######################################################################################################################
 # Setting for loss function
@@ -103,7 +103,7 @@ conf_trainer['seq_max_len'] = None
 conf_trainer['verbose'] = 1
 conf_trainer['save_ckpt'] = 5
 conf_trainer['ckpt_file'] = None
-conf_trainer['use_aug'] = True
+conf_trainer['use_aug'] = False
 conf_trainer['use_cls_token'] = True
 conf_trainer['pretrain_model'] = 'pretrain_model/mask_con.pth'
 conf_trainer['save_model'] = 'best_valid'
@@ -121,7 +121,7 @@ conf_tester['loss'] = conf_loss
 conf_tester['net'] = conf_net
 conf_tester['batch_size'] =32
 conf_tester['task'] = 'cls'
-conf_tester['use_aug'] = True
+conf_tester['use_aug'] = False
 conf_tester['use_cls_token'] = True
 
 assert conf_optim['type'] in ['adam', 'rms', 'sgd']

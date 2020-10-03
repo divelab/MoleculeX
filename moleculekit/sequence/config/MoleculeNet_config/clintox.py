@@ -121,7 +121,7 @@ conf_tester['loss'] = conf_loss
 conf_tester['net'] = conf_net
 conf_tester['batch_size'] =32
 conf_tester['task'] = 'cls'
-conf_tester['use_aug'] = True
+conf_tester['use_aug'] = False
 conf_tester['use_cls_token'] = True
 
 assert conf_optim['type'] in ['adam', 'rms', 'sgd']

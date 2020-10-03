@@ -23,7 +23,7 @@ def get_data_files(data_name, seed):
         splitfile = '../datasets/moleculenet/split_inds/{}random{}.pkl'.format(data_name, seed)
     elif data_name in ['bbbp', 'hiv', 'bace']:
         testfile =  '../datasets/moleculenet/{}.csv'.format(data_name)
-        splitfile = '../datasets/moleculeNet/split_inds/{}scaffold{}.pkl'.format(data_name, seed)
+        splitfile = '../datasets/moleculenet/split_inds/{}scaffold{}.pkl'.format(data_name, seed)
     else:
         raise ValueError('Please use dataset name from MoleculeNet!')
 
