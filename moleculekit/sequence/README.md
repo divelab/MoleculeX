@@ -17,7 +17,6 @@ Download our trained models from [this link](https://drive.google.com/drive/fold
 ```
 bash scripts/run_reproduce.sh
 ```
-Notice that we use test-time augmentation, so the reproduced results may not be exactly the same as, but very close to those reported in our paper.
 ### Pretrain
 In this code, we implement two pretrain tasks for downstream molecule property prediction task:
 - Mask prediction task, that is predicting the ids of masked tokens in a sequence, which is just the same pretrain task used in [original BERT paper](https://arxiv.org/abs/1810.04805).
