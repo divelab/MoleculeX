@@ -32,6 +32,6 @@ MoleculeKit has four modules covering deep and non-deep methods based on both mo
 
 The use of MoleculeKit requires the running of above four models with four output results. The four output results are then ensembled as the final prediction. Users of MoleculeKit are also given the freedom of employing fewer modules.
 
-The environment requirements for the these models might have conflict and we hence recommend create individual environments. To get started with MoleculeKit, access the above links for your desired modules.
+The environment requirements for these models might have conflict and we hence recommend create individual environments for each of them. To get started with MoleculeKit, access the above links for your desired modules.
 
 
