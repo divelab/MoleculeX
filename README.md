@@ -5,7 +5,7 @@
 
 ------
 
-# MoleculeKit: Machine Learning Methods for Molecular Property Prediction and Drug Discovery
+# MoleculeKit: Machine Learning Methods for Molecular Property Prediction and Drug Discovery [[Paper]](https://arxiv.org/abs/2012.01981)
 
 ## Overview
 
@@ -34,4 +34,15 @@ The use of MoleculeKit requires the running of above four models with four outpu
 
 The environment requirements for these models might have conflict and we hence recommend create individual environments for each of them. To get started with MoleculeKit, access the above links for your desired modules.
 
+## Reference
+```
+@misc{wang2020moleculekit,
+      title={MoleculeKit: Machine Learning Methods for Molecular Property Prediction and Drug Discovery}, 
+      author={Zhengyang Wang and Meng Liu and Youzhi Luo and Zhao Xu and Yaochen Xie and Limei Wang and Lei Cai and Shuiwang Ji},
+      year={2020},
+      eprint={2012.01981},
+      archivePrefix={arXiv},
+      primaryClass={q-bio.QM}
+}
+```
 
