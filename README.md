@@ -38,7 +38,7 @@ The environment requirements for these models might have conflict and we hence r
 ## Reference
 ```
 @article{wang2020moleculekit,
-  title={MoleculeKit: Machine Learning Methods for Molecular Property Prediction and Drug Discovery},
+  title={{MoleculeKit}: Machine Learning Methods for Molecular Property Prediction and Drug Discovery},
   author={Wang, Zhengyang and Liu, Meng and Luo, Youzhi and Xu, Zhao and Xie, Yaochen and Wang, Limei and Cai, Lei and Ji, Shuiwang},
   journal={arXiv preprint arXiv:2012.01981},
   year={2020}
