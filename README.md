@@ -37,7 +37,7 @@ The environment requirements for these models might have conflict and we hence r
 
 ## Reference
 ```
-@article{wang2020moleculekit,
+@article{wang2020advanced,
   title={Advanced Graph and Sequence Neural Networks for Molecular Property Prediction and Drug Discovery},
   author={Wang, Zhengyang and Liu, Meng and Luo, Youzhi and Xu, Zhao and Xie, Yaochen and Wang, Limei and Cai, Lei and Ji, Shuiwang},
   journal={arXiv preprint arXiv:2012.01981},
