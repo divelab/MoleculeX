@@ -38,11 +38,11 @@ conf['graph_level_feature'] = True
 ######################################################################################################################
 conf['epochs'] = 600
 conf['early_stopping'] = 300
-conf['lr'] = 0.0001
+conf['lr'] = 0.001
 conf['lr_decay_factor'] = 0.8
 conf['lr_decay_step_size'] = 50
 conf['dropout'] = 0
-conf['weight_decay'] = 0.00005
+conf['weight_decay'] = 0.0005
 conf['depth'] = 3
 conf['hidden'] = 256
 conf['batch_size'] = 64
