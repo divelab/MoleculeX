@@ -26,10 +26,10 @@ MoleculeX is unique in three aspects:
 ## Usage
 
 MoleculeX has four modules covering deep and non-deep methods based on both molecular graphs and SMILES sequence:
-* [ML-MPNN](https://github.com/divelab/MoleculeX/tree/master/MoleculeX/graph)
-* [Weisfeiler-Lehman subtree kernel](https://github.com/divelab/MoleculeX/tree/master/MoleculeX/kernels)
-* [contrastive-BERT](https://github.com/divelab/MoleculeX/tree/master/MoleculeX/sequence)
-* [subsequence kernel](https://github.com/divelab/MoleculeX/tree/master/MoleculeX/kernels)
+* [ML-MPNN](https://github.com/divelab/MoleculeX/tree/master/moleculex/graph)
+* [Weisfeiler-Lehman subtree kernel](https://github.com/divelab/moleculex/tree/master/MoleculeX/kernels)
+* [contrastive-BERT](https://github.com/divelab/MoleculeX/tree/master/moleculex/sequence)
+* [subsequence kernel](https://github.com/divelab/MoleculeX/tree/master/moleculex/kernels)
 
 The use of MoleculeX requires the running of above four models with four output results. The four output results are then ensembled as the final prediction. Users of MoleculeX are also given the freedom of employing fewer modules.
 
