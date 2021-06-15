@@ -19,6 +19,6 @@ Processed data size:
 We first generate conformers using RDKit and then convert them into graphs and store as lmdbs.
 
 ```
-python conformers/gen_confs.py
-python conformers/convert_lmdb.py
+python conformer/gen_confs.py
+python conformer/process_lmdb.py
 ```
