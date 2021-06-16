@@ -1,3 +1,5 @@
+## Scripts to run test of the 3D model. The code is similar to reproduce.ipynb.ß
+
 import os
 import torch
 from tqdm import tqdm
