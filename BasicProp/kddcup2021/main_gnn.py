@@ -116,23 +116,23 @@ def main():
 
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
 
-    dataset = PygPCQM4MDataset(root = '/mnt/dive/shared/mengliu/kdd2021cup/pyg_data')
+    dataset = PygPCQM4MDataset()
 
     if args.split_id==1:
         print('Use split 1!')
-        split_idx = torch.load('/mnt/dive/shared/mengliu/kdd2021cup/pyg_data/pcqm4m_kddcup2021/new_split1.pt')
+        split_idx = torch.load('./split_idx/new_split1.pt')
     elif args.split_id==2:
         print('Use split 2!')
-        split_idx = torch.load('/mnt/dive/shared/mengliu/kdd2021cup/pyg_data/pcqm4m_kddcup2021/new_split2.pt')
+        split_idx = torch.load('./split_idx/new_split2.pt')
     elif args.split_id==3:
         print('Use split 3!')
-        split_idx = torch.load('/mnt/dive/shared/mengliu/kdd2021cup/pyg_data/pcqm4m_kddcup2021/new_split3.pt')
+        split_idx = torch.load('./split_idx/new_split3.pt')
     elif args.split_id==4:
         print('Use split 4!')
-        split_idx = torch.load('/mnt/dive/shared/mengliu/kdd2021cup/pyg_data/pcqm4m_kddcup2021/new_split4.pt')
+        split_idx = torch.load('./split_idx/new_split4.pt')
     elif args.split_id==5:
         print('Use split 5!')
-        split_idx = torch.load('/mnt/dive/shared/mengliu/kdd2021cup/pyg_data/pcqm4m_kddcup2021/new_split5.pt')
+        split_idx = torch.load('./split_idx/new_split5.pt')
     else:
         print('Wrong split id!!!')
 

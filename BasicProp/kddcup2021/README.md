@@ -1,5 +1,5 @@
 # KDD Cup 2021 PCQM4M-LSC
-In this directory, we provide our solution to the KDD Cup 2021 PCQM4M-LSC. The goal of this ML task is to predict DFT-calculated HOMO-LUMO energy gap of molecules given their 2D molecular graphs.
+In this directory, we provide our solution to the KDD Cup 2021 PCQM4M-LSC. The goal of this ML task is to predict DFT-calculated HOMO-LUMO energy gap of molecules given their 2D molecular graphs. Our paper is available [here](https://github.com/divelab/MoleculeX/blob/master/BasicProp/kddcup2021/paper.pdf).
 
 ## Environment setup
 If you are using pytorch 1.6 and cuda 10.1, you can setup the environment by following the steps below:
