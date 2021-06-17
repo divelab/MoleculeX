@@ -1,5 +1,5 @@
 # KDD Cup 2021 PCQM4M-LSC
-In this directory, we provide our solution to the KDD Cup 2021 PCQM4M-LSC. The goal of this ML task is to predict DFT-calculated HOMO-LUMO energy gap of molecules given their 2D molecular graphs. Our paper is available [here](https://github.com/divelab/MoleculeX/blob/master/BasicProp/kddcup2021/paper.pdf).
+In this directory, we provide our solution to the KDD Cup 2021 PCQM4M-LSC. The goal of this ML task is to predict DFT-calculated HOMO-LUMO energy gap of molecules given their 2D molecular graphs. Our paper is available [here](https://arxiv.org/abs/2106.08551).
 
 ## Environment setup
 If you are using pytorch 1.6 and cuda 10.1, you can setup the environment by following the steps below:
@@ -32,3 +32,14 @@ python conformer/main_confs.py --split <split_id>
 
 ## How to generate final test result for submission
 We provide a [jupyter notebook](./reproduce.ipynb) to perform the model ensemble for the final test result. Result on test set will be saved under `test_result` folder. In this notebook, we also provide ensemble result on validation set for each validation split. Note that if you want to use our trained checkpoints, please download [2d_checkpoints folder](https://drive.google.com/drive/folders/1Y1gP4AZyFhfXiWLR16jlPoKIbhImyQFc?usp=sharing) and [conformer_checkpoints folder](https://drive.google.com/drive/folders/1LGEZ_mYLGMQrlL7zyPlwrPmiyjsRqjjc?usp=sharing) folder from google drive and put this foler under root directory of `kddcup2021`. 
+
+## Cite
+Please cite our paper if you find it useful in your work:
+```
+@article{liu2021fast,
+      title={Fast Quantum Property Prediction via Deeper 2D and 3D Graph Networks},
+      author={Meng Liu and Cong Fu and Xuan Zhang and Limei Wang and Yaochen Xie and Hao Yuan and Youzhi Luo and Zhao Xu and Shenglong Xu and Shuiwang Ji},
+      journal={arXiv preprint arXiv:2106.08551},
+      year={2021},
+}
+```
