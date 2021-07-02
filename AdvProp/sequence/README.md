@@ -4,6 +4,7 @@
 - scikit-learn
 - pytorch = 1.4.0
 - rdkit = 2018.09.1
+- [LibAUC](https://github.com/yzhuoning/LibAUC)
 
 If you have installed [Anaconda](https://www.anaconda.com/), you can execute the following commands to install and activate the environment:
 ```

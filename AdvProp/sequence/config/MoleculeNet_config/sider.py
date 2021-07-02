@@ -57,6 +57,12 @@ conf_optim['param'] = {'betas':(0.9,0.999), 'weight_decay':0, 'lr': 2e-5}
 ##                      that are inversely propotional to the number of positive (negative) samples in training set for the loss of positive (negative) samples
 ## 'mask_bce': specially designed for classification datasets with missing labels (e.g. pcba, muv, tox21 and toxcast in MoleculeNet), do not
 ##                           compute loss for missing labels
+## 'auroc': the AUC margin loss for ROC-AUC optimization, see the following paper for details:
+##    Yuan, Z., Yan, Y., Sonka, M. & Yang, T. Robust Deep AUC Maximization: A New Surrogate Loss and Empirical Studieson 
+##    on Medical Image Classification.arXiv preprint arXiv:2012.03173(2020).
+## 'auprc': the squared hinge loss for PRC-AUC optimization, see the following paper for details:
+##    Qi, Q., Luo, Y., Xu, Z.,Ji, S. & Yang, T. Stochastic Optimization of Areas Under Precision-Recall Curves with Provable
+##    Convergence.arXiv preprint arXiv:2104.08736(2021).
 ######################################################################################################################
 conf_loss = {}
 conf_loss['type'] = 'bce'
