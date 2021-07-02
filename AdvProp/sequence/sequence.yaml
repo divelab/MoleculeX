@@ -1,4 +1,4 @@
-name: sequence2
+name: sequence
 channels:
   - pytorch
   - conda-forge
@@ -15,5 +15,7 @@ dependencies:
   - cudatoolkit=10.0.130
   - pytorch==1.4.0
   - torchvision==0.5.0
-
+  - pip:
+    - libauc
+    - tensorflow
 

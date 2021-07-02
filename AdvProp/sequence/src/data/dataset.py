@@ -94,10 +94,13 @@ class TargetSet(Dataset):
         label_as_tensor = torch.tensor(mol_label).float()
         mask_as_tensor = torch.tensor(mask).float()
 
-        output = {"seq_input": seq_as_tensor,
-                  "length": length_as_tensor,
-                  "label": label_as_tensor,
-                  "mask": mask_as_tensor}
+        output = {
+            "idx": idx,
+            "seq_input": seq_as_tensor,
+            "length": length_as_tensor,
+            "label": label_as_tensor,
+            "mask": mask_as_tensor
+        }
 
         return output
     

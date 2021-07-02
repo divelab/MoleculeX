@@ -58,7 +58,11 @@ conf_optim['param'] = {'betas':(0.9,0.999), 'weight_decay':0, 'lr': 2e-5}
 ## 'mask_bce': specially designed for classification datasets with missing labels (e.g. pcba, muv, tox21 and toxcast in MoleculeNet), do not
 ##                           compute loss for missing labels
 ######################################################################################################################
-conf_loss = 'mse'
+conf_loss = {}
+conf_loss['type'] = 'mse'
+conf_loss['margin'] = 0.5
+conf_loss['beta'] = 0.99
+conf_loss['gamma'] = 500
 
 ######################################################################################################################
 # Setting for learning rate scheduler

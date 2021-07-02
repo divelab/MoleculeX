@@ -10,6 +10,9 @@ from evaluate import Tester
 import argparse
 import os
 import sys
+from libauc.losses import APLoss_SH, AUCMLoss
+from libauc.optimizers import SOAP_ADAM, SOAP_SGD, PESG
+from libauc.datasets import ImbalanceSampler
 
 
 
@@ -48,12 +51,14 @@ class Trainer():
             model = BERTChem_TAR(vocab_size=vocab_size, seq_len=seq_len, **param)
             if self.config['pretrain_model'] is not None:
                 model.load_feat_net(self.config['pretrain_model'])
+            if self.config['loss']['type'] in ['auprc', 'auroc']:
+                model.pred[0].linear.reset_parameters()
             return model
         else:
             raise ValueError('not supported network model!')
     
     def _get_loss_fn(self):
-        type = self.config['loss']
+        type = self.config['loss']['type']
         if type == 'bce':
             return bce_loss(use_gpu=self.config['use_gpu'])
         elif type == 'wb_bce':
@@ -62,21 +67,43 @@ class Trainer():
         elif type == 'mask_bce':
             return masked_bce_loss()
         elif type == 'mse':
-            return torch.nn.MSELoss(reduction='sum')        
+            return torch.nn.MSELoss(reduction='sum')
+        elif type == 'auprc':
+            margin, beta, data_len = self.config['loss']['margin'], self.config['loss']['beta'], len(self.trainset)
+            return APLoss_SH(margin=margin, beta=beta, data_len=data_len)
+        elif type == 'auroc':
+            imratio = self.trainset.labels.sum() / len(self.trainset.labels)
+            return AUCMLoss(imratio=imratio)
         else:
             raise ValueError('not supported loss function!')
 
     def _get_optim(self):
-        type, param = self.config['optim']['type'], self.config['optim']['param']
-        model_params = self.net.parameters()
-        if type == 'adam':
-            return torch.optim.Adam(model_params, **param)
-        elif type == 'rms':
-            return torch.optim.RMSprop(model_params, **param)
-        elif type == 'sgd':
-            return torch.optim.SGD(model_params, **param)
+        if self.config['loss']['type'] == 'auroc':
+            a, b, alpha = self.criterion.a, self.criterion.b, self.criterion.alpha
+            imratio = self.trainset.labels.sum() / len(self.trainset.labels)
+            lr, weight_decay = self.config['optim']['param']['lr'], self.config['optim']['param']['weight_decay']
+            gamma, margin = self.config['loss']['gamma'], self.config['loss']['margin']
+            return PESG(self.net, a=a, b=b, alpha=alpha, imratio=imratio, lr=lr, weight_decay=weight_decay, gamma=gamma, margin=margin)
         else:
-            raise ValueError('not supported optimizer!')
+            type, param = self.config['optim']['type'], self.config['optim']['param']
+            model_params = self.net.parameters()
+            if type == 'adam':
+                if self.config['loss']['type'] == 'auprc':
+                    return SOAP_ADAM(model_params, **param)
+                else:
+                    return torch.optim.Adam(model_params, **param)
+            elif type == 'rms':
+                if self.config['loss']['type'] == 'auprc':
+                    raise ValueError('The RMS optimizer is not supported for optimizing the auprc loss function!')
+                else:
+                    return torch.optim.RMSprop(model_params, **param)
+            elif type == 'sgd':
+                if self.config['loss']['type'] == 'auprc':
+                    return SOAP_SGD(model_params, **param)
+                else:
+                    return torch.optim.SGD(model_params, **param)
+            else:
+                raise ValueError('not supported optimizer!')
 
     def _get_lr_scheduler(self):
         type, param = self.config['lr_scheduler']['type'], self.config['lr_scheduler']['param']
@@ -106,18 +133,23 @@ class Trainer():
             elif self.config['net']['type'] in ['bert_tar']:
                 outputs = self.net(seq_inputs)
 
-            if self.config['loss'] in ['bce', 'wb_bce']:
+            if self.config['loss']['type'] in ['bce', 'wb_bce', 'auroc']:
                 loss = self.criterion(outputs, labels)
-            elif self.config['loss'] in ['mse']:
+            elif self.config['loss']['type'] in ['mse']:
                 loss = self.criterion(outputs, labels) / outputs.shape[0]
-            elif self.config['loss'] in ['mask_bce']:
+            elif self.config['loss']['type'] in ['mask_bce']:
                 mask = data_batch['mask']
                 if self.config['use_gpu']:
                     mask = mask.to('cuda')
                 loss = self.criterion(outputs, labels, mask)
+            elif self.config['loss']['type'] in ['auprc']:
+                loss = self.criterion(outputs, labels, index_s=data_batch['idx'])
 
             self.optim.zero_grad()
-            loss.backward()
+            if self.config['loss']['type'] == 'auroc':
+                loss.backward(retain_graph=True)
+            else:
+                loss.backward()
             self.optim.step()
 
             total_loss += loss.to('cpu').item()
@@ -167,6 +199,9 @@ class Trainer():
             
         for i in range(self.start_epoch, epoches+1):
             print("Epoch {} ...".format(i))
+            if self.config['loss']['type'] == 'auprc':
+                sampler = ImbalanceSampler(self.trainset.labels.reshape(-1).astype(int), self.config['batch_size'], pos_num=1)
+                self.trainloader = DataLoader(self.trainset, batch_size=self.config['batch_size'], sampler=sampler)
             self._train_loss(self.trainloader)
             metric1, metric2 = self._valid(i, metric_name1, metric_name2)
             if save_model == 'best_valid':
