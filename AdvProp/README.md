@@ -12,11 +12,12 @@
 
 Properties of molecules are indicative of their functions and thus are useful in many applications. As a cost-effective alternative to experimental approaches, computational methods for predicting molecular properties are gaining increasing momentum and success. However, there lacks a comprehensive collection of tools and methods for this task currently. Here we develop the MoleculeX, a suite of comprehensive machine learning tools spanning different computational models and molecular representations for molecular property prediction and drug discovery. Specifically, MoleculeX represents molecules as both graphs and sequences. Built on these representations, MoleculeX includes both deep learning and traditional machine learning methods for graph and sequence data. Noticeably, we propose and develop novel deep models for learning from molecular graphs and sequences. Therefore, MoleculeX not only serves as a comprehensive tool, but also contributes towards developing novel and advanced graph and sequence learning methodologies. Results on both online and offline antibiotics discovery and molecular property prediction tasks show that MoleculeX achieves consistent improvements over prior methods.
 
-MoleculeX is unique in three aspects:
+MoleculeX is unique in four aspects:
 
 * MoleculeX consists of a suite of comprehensive machine learning methods across different data types and method types. We expect them to provide complementary information for molecular property prediction and yield better performance. 
 * An effective graph-based deep learning method named multi-level message passing neural network (ML-MPNN) is proposed to make full use of richly informative molecular graphs.
 * A new sequence-based deep learning method named contrastive-BERT, pretrained by a novel self-supervised task via contrastive learning, is incorporated.
+* Effective loss functions for optmizing ROC-AUC and PRC-AUC.
 
 <p align="center">
 <img src="https://github.com/divelab/MoleculeX/blob/master/imgs/overview.png" width="1000" class="center" alt="overview"/>
@@ -34,6 +35,8 @@ MoleculeX has four modules covering deep and non-deep methods based on both mole
 The use of MoleculeX requires the running of above four models with four output results. The four output results are then ensembled as the final prediction. Users of MoleculeX are also given the freedom of employing fewer modules.
 
 The environment requirements for these models might have conflict and we hence recommend create individual environments for each of them. To get started with MoleculeX, access the above links for your desired modules.
+
+We use the LibAUC package to optimize ROC-AUC and PRC-AUC with effective surrogate loss functions. See the [package website](https://libauc.org/) for more information.
 
 ## Reference
 ```
