@@ -19,6 +19,7 @@ pip install pandas_flavor
     * PyTorch 1.4.0
     * PyTorch Geometric 1.6.0
     * RDKit 2020.03.3
+    * [LibAUC](https://github.com/yzhuoning/LibAUC)
 
 ## Make prediction using our reproducible trained models
 * Step 1: Convert original SMILES string to Pytorch Geometric Data type. An example is avaliable in 'scripts/tran_data.sh':

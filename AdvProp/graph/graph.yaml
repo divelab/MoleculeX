@@ -21,6 +21,8 @@ dependencies:
   - tqdm==4.46.1
   - pip:
     - tensorboard-plugin-wit==1.7.0
+    - libauc
+    - tensorflow
     
     
     

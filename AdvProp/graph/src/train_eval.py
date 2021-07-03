@@ -6,6 +6,9 @@ from torch.optim import Adam
 from torch_geometric.data import DataLoader
 from metric import compute_cla_metric, compute_reg_metric
 import numpy as np
+from libauc.losses import APLoss_SH, AUCMLoss
+from libauc.optimizers import SOAP_ADAM, PESG
+from libauc.datasets import ImbalanceSampler
 
 from tensorboardX import SummaryWriter
 
@@ -15,11 +18,33 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ### This is run function for classification tasks
 def run_classification(train_dataset, val_dataset, test_dataset, model, num_tasks, epochs, batch_size, vt_batch_size, lr,
-        lr_decay_factor, lr_decay_step_size, weight_decay, early_stopping, metric, log_dir, save_dir, evaluate):
+        lr_decay_factor, lr_decay_step_size, weight_decay, early_stopping, loss_config, metric, log_dir, save_dir, evaluate, pre_train=None):
 
     model = model.to(device)
-    optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    ce_loss = torch.nn.BCEWithLogitsLoss(reduction='none')
+    if pre_train is not None:
+        state_key = torch.load(pre_train)
+        filtered = {k:v for k,v in state_key.items() if 'mlp1' not in k}
+        model.load_state_dict(filtered, False)
+        model.mlp1.reset_parameters()
+    
+    loss_type = loss_config['type']
+    if loss_type == 'bce':
+        criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
+        optimizer = Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    elif loss_type == 'auprc':
+        labels = [int(data.y.item()) for data in train_dataset]
+        margin, beta = loss_config['margin'], loss_config['beta']
+        data_len = len(train_dataset) + len(val_dataset) + len(test_dataset)
+        criterion = APLoss_SH(margin=margin, beta=beta, data_len=data_len)
+        optimizer = SOAP_ADAM(model.parameters, lr=lr, weight_decay=weight_decay)
+    elif loss_type == 'auroc':
+        margin, gamma, imratio = loss_config['margin'], loss_config['gamma'], train_dataset.labels.sum() / len(train_dataset.labels)
+        criterion = AUCMLoss(margin=margin, imratio=imratio)
+        a, b, alpha = criterion.a, criterion.b, criterion.alpha
+        optimizer = PESG(model, a=a, b=b, alpha=alpha, imratio=imratio, lr=lr, weight_decay=weight_decay, gamma=gamma, margin=margin)
+    else:
+        raise ValueError('not supported loss function!')
+    
 
     test_loader = DataLoader(test_dataset, vt_batch_size, shuffle=False)
     val_loader = DataLoader(val_dataset, vt_batch_size, shuffle=False)
@@ -46,14 +71,18 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
         ### synchronizing helps to record more accurate running time
         if torch.cuda.is_available():
             torch.cuda.synchronize()
-            
-        train_loader = DataLoader(train_dataset, batch_size, shuffle=True, drop_last=True)
+
+        if loss_type == 'auprc':
+            sampler = ImbalanceSampler(labels, batch_size, pos_num=1)
+            train_loader = DataLoader(train_dataset, batch_size, shuffle=True, drop_last=True, sampler=sampler)
+        else:   
+            train_loader = DataLoader(train_dataset, batch_size, shuffle=True, drop_last=True)
         
         t_start = time.perf_counter()
         
-        total_train_loss = train_classification(model, optimizer, train_loader, num_tasks, ce_loss, device) 
+        total_train_loss = train_classification(model, optimizer, train_loader, num_tasks, loss_type, criterion, device) 
         
-        val_prc_results, val_roc_results, total_val_loss = val_classification(model, val_loader, num_tasks, ce_loss, device)
+        val_prc_results, val_roc_results, total_val_loss = val_classification(model, val_loader, num_tasks, loss_type, criterion, device)
 
         
         ### All loss we consider is per-sample loss
@@ -124,7 +153,7 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
 
 
     
-def train_classification(model, optimizer, train_loader, num_tasks, ce_loss, device):
+def train_classification(model, optimizer, train_loader, num_tasks, loss_type, criterion, device):
     model.train()
 
     losses = []
@@ -132,22 +161,35 @@ def train_classification(model, optimizer, train_loader, num_tasks, ce_loss, dev
         optimizer.zero_grad()
         batch_data = batch_data.to(device)
         out = model(batch_data)
-        if len(batch_data.y.shape) != 2:
-            batch_data.y = torch.reshape(batch_data.y, (-1, num_tasks))
-        mask = torch.Tensor([[not np.isnan(x) for x in tb] for tb in batch_data.y.cpu()]) # Skip those without targets (in PCBA, MUV, Tox21, ToxCast)
-        mask = mask.to(device)
-        target = torch.Tensor([[0 if np.isnan(x) else x for x in tb] for tb in batch_data.y.cpu()])
-        target = target.to(device)
-        loss = ce_loss(out, target) * mask
-        loss = loss.sum()
-        loss.backward()
+
+        if loss_type == 'bce':
+            if len(batch_data.y.shape) != 2:
+                batch_data.y = torch.reshape(batch_data.y, (-1, num_tasks))
+            mask = torch.Tensor([[not np.isnan(x) for x in tb] for tb in batch_data.y.cpu()]) # Skip those without targets (in PCBA, MUV, Tox21, ToxCast)
+            mask = mask.to(device)
+            target = torch.Tensor([[0 if np.isnan(x) else x for x in tb] for tb in batch_data.y.cpu()])
+            target = target.to(device)
+            loss = criterion(out, target) * mask
+            loss = loss.sum()
+            loss.backward()
+        elif loss_type == 'auprc':
+            target = batch_data.y
+            predScore = torch.nn.Sigmoid()(out)
+            loss = criterion(predScore, target, index_s=batch_data.idx.long())
+            loss.backward()
+        elif loss_type == 'auroc':
+            target = batch_data.y
+            predScore = torch.nn.Sigmoid()(out)
+            loss = criterion(predScore, target)
+            loss.backward(retain_graph=True)
+        
         optimizer.step()
         losses.append(loss)
     return sum(losses).item()
 
 
 
-def val_classification(model, val_loader, num_tasks, ce_loss, device):
+def val_classification(model, val_loader, num_tasks, loss_type, criterion, device):
     model.eval()
 
     preds = torch.Tensor([]).to(device)
@@ -157,14 +199,25 @@ def val_classification(model, val_loader, num_tasks, ce_loss, device):
         batch_data = batch_data.to(device)
         with torch.no_grad():
             out = model(batch_data)
-        if len(batch_data.y.shape) != 2:
-            batch_data.y = torch.reshape(batch_data.y, (-1, num_tasks))
-        mask = torch.Tensor([[not np.isnan(x) for x in tb] for tb in batch_data.y.cpu()])
-        mask = mask.to(device)
-        target = torch.Tensor([[0 if np.isnan(x) else x for x in tb] for tb in batch_data.y.cpu()])
-        target = target.to(device)
-        loss = ce_loss(out, target) * mask
-        loss = loss.sum()
+        
+        if loss_type == 'bce':
+            if len(batch_data.y.shape) != 2:
+                batch_data.y = torch.reshape(batch_data.y, (-1, num_tasks))
+            mask = torch.Tensor([[not np.isnan(x) for x in tb] for tb in batch_data.y.cpu()])
+            mask = mask.to(device)
+            target = torch.Tensor([[0 if np.isnan(x) else x for x in tb] for tb in batch_data.y.cpu()])
+            target = target.to(device)
+            loss = criterion(out, target) * mask
+            loss = loss.sum()
+        elif loss_type == 'auprc':
+            target = batch_data.y
+            predScore = torch.nn.Sigmoid()(out)
+            loss = criterion(predScore, target, index_s=batch_data.idx.long())
+        elif loss_type == 'auroc':
+            target = batch_data.y
+            predScore = torch.nn.Sigmoid()(out)
+            loss = criterion(predScore, target)
+
         losses.append(loss)
         pred = torch.sigmoid(out) ### prediction real number between (0,1)
         preds = torch.cat([preds,pred], dim=0)

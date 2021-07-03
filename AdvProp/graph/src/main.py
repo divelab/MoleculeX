@@ -101,7 +101,7 @@ else:
 
 ### Run
 if conf['task_type'] == "classification":
-    run_classification(train_dataset, val_dataset, test_dataset, model, conf['num_tasks'], conf['epochs'], conf['batch_size'], conf['vt_batch_size'], conf['lr'], conf['lr_decay_factor'], conf['lr_decay_step_size'], conf['weight_decay'], conf['early_stopping'], conf['metric'], args.log_dir, args.save_dir, args.evaluate)
+    run_classification(train_dataset, val_dataset, test_dataset, model, conf['num_tasks'], conf['epochs'], conf['batch_size'], conf['vt_batch_size'], conf['lr'], conf['lr_decay_factor'], conf['lr_decay_step_size'], conf['weight_decay'], conf['early_stopping'], conf['loss'], conf['metric'], args.log_dir, args.save_dir, args.evaluate)
 elif conf['task_type'] == "regression":
     run_regression(train_dataset, val_dataset, test_dataset, model, conf['num_tasks'], conf['epochs'], conf['batch_size'], conf['vt_batch_size'], conf['lr'], conf['lr_decay_factor'], conf['lr_decay_step_size'], conf['weight_decay'], conf['early_stopping'], conf['metric'], args.log_dir, args.save_dir, args.evaluate)
 else:

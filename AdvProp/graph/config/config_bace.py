@@ -46,6 +46,11 @@ conf['depth'] = 3
 conf['hidden'] = 32
 conf['batch_size'] = 64
 
+conf['loss'] = {}
+conf['loss']['type'] = 'bce'
+conf['loss']['margin'] = 0.5
+conf['loss']['beta'] = 0.99
+conf['loss']['gamma'] = 500
 
 ######################################################################################################################
 # Settings for val/test
