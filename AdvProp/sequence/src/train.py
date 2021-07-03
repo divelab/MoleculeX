@@ -72,8 +72,8 @@ class Trainer():
             margin, beta, data_len = self.config['loss']['margin'], self.config['loss']['beta'], len(self.trainset)
             return APLoss_SH(margin=margin, beta=beta, data_len=data_len)
         elif type == 'auroc':
-            imratio = self.trainset.labels.sum() / len(self.trainset.labels)
-            return AUCMLoss(imratio=imratio)
+            margin, imratio = self.config['loss']['margin'], self.trainset.labels.sum() / len(self.trainset.labels)
+            return AUCMLoss(margin=margin, imratio=imratio)
         else:
             raise ValueError('not supported loss function!')
 
