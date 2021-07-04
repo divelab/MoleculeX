@@ -20,7 +20,7 @@ AdvProp is unique in four aspects:
 
 ## Usage
 
-MoleculeX has four modules covering deep and non-deep methods based on both molecular graphs and SMILES sequence:
+AdvProp has four modules covering deep and non-deep methods based on both molecular graphs and SMILES sequence:
 * [ML-MPNN](graph)
 * [Weisfeiler-Lehman subtree kernel](kernels)
 * [contrastive-BERT](sequence)
