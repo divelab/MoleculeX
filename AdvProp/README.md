@@ -30,13 +30,13 @@ The use of AdvProp requires the running of above four models with four output re
 
 The environment requirements for these models might have conflict and we hence recommend create individual environments for each of them. To get started with AdvProp, access the above links for your desired modules.
 
-We use the LibAUC package to optimize [ROC-AUC](https://www.sciencedirect.com/science/article/pii/S016786550500303X) and [PRC-AUC](https://dl.acm.org/doi/abs/10.1145/1143844.1143874) with effective surrogate loss functions. See the [package website](https://libauc.org/) for more information.
+We use the LibAUC package to optimize [ROC-AUC](https://arxiv.org/abs/2012.03173) and [PRC-AUC](https://arxiv.org/abs/2104.08736) with effective surrogate loss functions. See the [package website](https://libauc.org/) for more information.
 
 ## Reference
 ```
 @article{wang2020advanced,
   title={Advanced Graph and Sequence Neural Networks for Molecular Property Prediction and Drug Discovery},
-  author={Wang, Zhengyang and Liu, Meng and Luo, Youzhi and Xu, Zhao and Xie, Yaochen and Wang, Limei and Cai, Lei and Ji, Shuiwang},
+  author={Wang, Zhengyang and Liu, Meng and Luo, Youzhi and Xu, Zhao and Xie, Yaochen and Wang, Limei and Cai, Lei and Qi, Qi and Tianbao, Yang and Ji, Shuiwang},
   journal={arXiv preprint arXiv:2012.01981},
   year={2020}
 }
