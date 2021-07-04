@@ -36,9 +36,10 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
         margin, beta = loss_config['margin'], loss_config['beta']
         data_len = len(train_dataset) + len(val_dataset) + len(test_dataset)
         criterion = APLoss_SH(margin=margin, beta=beta, data_len=data_len)
-        optimizer = SOAP_ADAM(model.parameters, lr=lr, weight_decay=weight_decay)
+        optimizer = SOAP_ADAM(model.parameters(), lr=lr, weight_decay=weight_decay)
     elif loss_type == 'auroc':
-        margin, gamma, imratio = loss_config['margin'], loss_config['gamma'], train_dataset.labels.sum() / len(train_dataset.labels)
+        labels = [int(data.y.item()) for data in train_dataset]
+        margin, gamma, imratio = loss_config['margin'], loss_config['gamma'], sum(labels) / len(labels)
         criterion = AUCMLoss(margin=margin, imratio=imratio)
         a, b, alpha = criterion.a, criterion.b, criterion.alpha
         optimizer = PESG(model, a=a, b=b, alpha=alpha, imratio=imratio, lr=lr, weight_decay=weight_decay, gamma=gamma, margin=margin)
@@ -74,7 +75,7 @@ def run_classification(train_dataset, val_dataset, test_dataset, model, num_task
 
         if loss_type == 'auprc':
             sampler = ImbalanceSampler(labels, batch_size, pos_num=1)
-            train_loader = DataLoader(train_dataset, batch_size, shuffle=True, drop_last=True, sampler=sampler)
+            train_loader = DataLoader(train_dataset, batch_size, sampler=sampler)
         else:   
             train_loader = DataLoader(train_dataset, batch_size, shuffle=True, drop_last=True)
         
@@ -221,7 +222,7 @@ def val_classification(model, val_loader, num_tasks, loss_type, criterion, devic
         losses.append(loss)
         pred = torch.sigmoid(out) ### prediction real number between (0,1)
         preds = torch.cat([preds,pred], dim=0)
-        targets = torch.cat([targets, batch_data.y], dim=0)
+        targets = torch.cat([targets, batch_data.y.view(-1, num_tasks)], dim=0)
     
     prc_results, roc_results = compute_cla_metric(targets.cpu().detach().numpy(), preds.cpu().detach().numpy(), num_tasks)
     

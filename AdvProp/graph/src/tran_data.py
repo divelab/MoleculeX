@@ -224,6 +224,7 @@ def save_to_data(networks, labels):
         data['x'] = data['x'].to(dtype=torch.float32)
         data['edge_index'] = data['edge_index'].to(dtype=torch.int64)
         data['edge_attr'] = data['edge_attr'].to(dtype=torch.float32)
+        data['idx'] = torch.tensor(idx, dtype=torch.float32)
         if args.graph_level_feature:
             graph_attr = torch.tensor(nx.graph['graph_attr'], dtype=torch.float32)
             is_nan = ~(graph_attr == graph_attr)
