@@ -36,7 +36,7 @@ We use the LibAUC package to optimize [ROC-AUC](https://arxiv.org/abs/2012.03173
 ```
 @article{wang2020advanced,
   title={Advanced Graph and Sequence Neural Networks for Molecular Property Prediction and Drug Discovery},
-  author={Wang, Zhengyang and Liu, Meng and Luo, Youzhi and Xu, Zhao and Xie, Yaochen and Wang, Limei and Cai, Lei and Qi, Qi and Tianbao, Yang and Ji, Shuiwang},
+  author={Wang, Zhengyang and Liu, Meng and Luo, Youzhi and Xu, Zhao and Xie, Yaochen and Wang, Limei and Cai, Lei and Qi, Qi and Yuan, Zhuoning and Yang, Tianbao and Ji, Shuiwang},
   journal={arXiv preprint arXiv:2012.01981},
   year={2020}
 }
