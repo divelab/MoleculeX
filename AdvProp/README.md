@@ -11,7 +11,7 @@ AdvProp is unique in four aspects:
 * AdvProp consists of a suite of comprehensive machine learning methods across different data types and method types. We expect them to provide complementary information for molecular property prediction and yield better performance. 
 * An effective graph-based deep learning method named multi-level message passing neural network (ML-MPNN) is proposed to make full use of richly informative molecular graphs.
 * A new sequence-based deep learning method named contrastive-BERT, pretrained by a novel self-supervised task via contrastive learning, is incorporated.
-* Effective stochastic methods towards optmizing ROC-AUC and PRC-AUC for deep learning.
+* Effective stochastic methods towards optimizing ROC-AUC and PRC-AUC for deep learning.
 
 <p align="center">
 <img src="https://github.com/divelab/MoleculeX/blob/master/imgs/overview.png" width="1000" class="center" alt="overview"/>
@@ -30,7 +30,7 @@ The use of AdvProp requires the running of above four models with four output re
 
 The environment requirements for these models might have conflict and we hence recommend create individual environments for each of them. To get started with AdvProp, access the above links for your desired modules.
 
-We use the LibAUC package to optimize [ROC-AUC](https://arxiv.org/abs/2012.03173) and [PRC-AUC](https://arxiv.org/abs/2104.08736) with effective stochastic methods for apporpriate surrogate loss functions of these two AUC scores. See the [package website](https://libauc.org/) for more information.
+We use the LibAUC package to optimize [ROC-AUC](https://arxiv.org/abs/2012.03173) and [PRC-AUC](https://arxiv.org/abs/2104.08736) with effective stochastic methods for appropriate surrogate loss functions of these two AUC scores. See the [package website](https://libauc.org/) for more information.
 
 ## Reference
 ```
