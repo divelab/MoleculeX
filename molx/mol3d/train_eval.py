@@ -1,6 +1,7 @@
 import torch
 from torch_geometric.data import DataLoader
 from molx.model import *
+from utils import *
 # from schnet import SchNet
 # from schnet_2d import SchNet2D
 # from loss import *
@@ -54,3 +55,41 @@ class Mol3DTrainer():
             i += 1
 
         return loss_total / i
+
+
+def eval3d(model, dataloader):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.eval()
+    mses, maes = 0., 0.
+    total_dist_counts, fail_edm_counts, fail_3d_counts = 0, 0, 0
+    i = 0
+    for batch_data in dataloader:
+
+        coords = batch_data.xyz
+        d_target = torch.tensor(torch.cdist(coords, coords)).float().to(device)
+
+        batch_data = batch_data.to(device)
+        with torch.no_grad():
+            mask_d_pred, mask, dist_count = model(batch_data, train=False)
+        mask_d_target = d_target * mask
+
+        # Evaluate errors of distances
+        mse_dist_sum = torch.nn.MSELoss(reduction='sum')(mask_d_pred, mask_d_target)
+        mae_dist_sum = torch.nn.L1Loss(reduction='sum')(mask_d_pred, mask_d_target)
+
+        # Evaluate validity of distance matrix
+        d_square = torch.square(mask_d_pred)
+        xyz_list, fail_edm_count, fail_3d_count = generate_xyz(d_square, batch_data.batch)
+
+        maes += mae_dist_sum.cpu().detach().numpy()
+        mses += mse_dist_sum.cpu().detach().numpy()
+        total_dist_counts += dist_count.cpu().detach().numpy()
+        fail_edm_counts += fail_edm_count
+        fail_3d_counts += fail_3d_count
+        i += 1
+
+    rmse = np.sqrt(mses / total_dist_counts)
+    mae = maes / total_dist_counts
+    valid_edm_percent = 1 - fail_edm_counts / len(dataloader)
+    valid_3d_coords = 1 - fail_3d_counts / len(dataloader)
+    return mae, rmse, valid_edm_percent, valid_3d_coords
