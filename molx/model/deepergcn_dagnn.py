@@ -13,11 +13,23 @@ class Deepergcn_dagnn_dist(torch.nn.Module):
 
         self.deepergcn_dagnn = DeeperDAGNN_node_Virtualnode(num_layers, emb_dim, drop_ratio, JK, aggr, norm)
         self.fc = torch.nn.Linear(in_features=emb_dim, out_features=1)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def forward(self, batched_data):
+    def forward(self, batched_data, train=False):
         xs = self.deepergcn_dagnn(batched_data)
-        dists = self.fc(torch.max(xs.unsqueeze(0), xs.unsqueeze(1))).squeeze()
-        return dists
+        d_pred = self.fc(torch.max(xs.unsqueeze(0), xs.unsqueeze(1))).squeeze()
+
+        batch = batched_data.batch
+        n = batch.shape[0]
+        mask = torch.eq(batch.unsqueeze(1), batch.unsqueeze(0))
+        mask = (torch.ones((n, n)) - torch.eye(n)).to(self.device) * mask
+        count = torch.sum(mask)
+
+        if train:
+            mask_d_pred = d_pred * mask
+        else:
+            mask_d_pred = F.relu(d_pred * mask)
+        return mask_d_pred, mask, count
 
 
 class Deepergcn_dagnn_coords(torch.nn.Module):
@@ -27,11 +39,22 @@ class Deepergcn_dagnn_coords(torch.nn.Module):
         self.deepergcn_dagnn = DeeperDAGNN_node_Virtualnode(num_layers, emb_dim, drop_ratio, JK, aggr, norm)
         self.fc = torch.nn.Linear(in_features=emb_dim, out_features=3)
 
-    def forward(self, batched_data):
+    def forward(self, batched_data, train=False):
         xs = self.deepergcn_dagnn(batched_data)
         xs = self.fc(xs)
-        dists = torch.cdist(xs, xs)
-        return dists
+        d_pred = torch.cdist(xs, xs)
+
+        batch = batched_data.batch
+        n = batch.shape[0]
+        mask = torch.eq(batch.unsqueeze(1), batch.unsqueeze(0))
+        mask = (torch.ones((n, n)) - torch.eye(n)).to(self.device) * mask
+        count = torch.sum(mask)
+
+        if train:
+            mask_d_pred = d_pred * mask
+        else:
+            mask_d_pred = F.relu(d_pred * mask)
+        return mask_d_pred, mask, count
 
 
 class DAGNN(MessagePassing):
