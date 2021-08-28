@@ -2,6 +2,7 @@ import os, json, ast, glob, ssl
 import torch
 import os.path as osp
 import numpy as np
+import pandas as pd
 
 from tqdm import tqdm
 from rdkit import Chem
@@ -60,7 +61,7 @@ class Molecule3D(InMemoryDataset):
         self.root = root
         self.name = 'Molecule3D'
 
-        super(PubChemQCDataset, self).__init__(root, transform, pre_transform, pre_filter)
+        super(Molecule3D, self).__init__(root, transform, pre_transform, pre_filter)
         assert osp.exists(self.raw_paths[0]), "Please manually download the raw data."
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
@@ -134,7 +135,10 @@ class Molecule3D(InMemoryDataset):
                      osp.join(self.raw_dir, 'combined_mols_2000000_to_3000000.sdf'),
                      osp.join(self.raw_dir, 'combined_mols_3000000_to_3899647.sdf')]
         suppl_list = [Chem.SDMolSupplier(p, removeHs=False, sanitize=True) for p in sdf_paths]
-
+        
+        target_path = osp.join(self.raw_dir, 'properties.csv')
+        target_df = pd.read_csv(target_path)
+        
         abs_idx = -1
         for i, suppl in enumerate(suppl_list):
             for j in tqdm(range(len(suppl)), desc=f'{i+1}/{len(sdf_paths)}'):
@@ -147,10 +151,15 @@ class Molecule3D(InMemoryDataset):
                 graph = mol2graph(mol)
                 data = Data()
                 data.__num_nodes__ = int(graph['num_nodes'])
+                
+                # Required by GNNs
                 data.edge_index = torch.from_numpy(graph['edge_index']).to(torch.int64)
                 data.edge_attr = torch.from_numpy(graph['edge_feat']).to(torch.int64)
                 data.x = torch.from_numpy(graph['node_feat']).to(torch.int64)
+                data.y = torch.FloatTensor(target_df.values[abs_idx, 1:])
                 data.smiles = smiles
+                
+                # Required by Schnet
                 data.xyz = torch.tensor(coords, dtype=torch.float32)
                 data.z = torch.tensor(z, dtype=torch.int64)
                 data_list.append(data)
@@ -165,6 +174,7 @@ class Molecule3D(InMemoryDataset):
             of virtual node and edge feature.
         """
         full_list = self.pre_process()
+        
         ind_path = osp.join(self.raw_dir, '{}_split_inds.json').format(split_mode)
         with open(path, 'r') as f:
              inds = json.load(f)
