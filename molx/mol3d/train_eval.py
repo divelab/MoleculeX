@@ -9,6 +9,7 @@ class Mol3DTrainer():
         self.configs = configs
         self.train_loader = loader
         self.val_loader = val_loader
+        self.out_path = configs['out_path']
         self.start_epoch = 1
         self.device = device
 
@@ -25,7 +26,7 @@ class Mol3DTrainer():
         loss_total = 0
         i = 0
         for batch_data in self.train_loader:
-            self.optimizer.zero_grad()
+            optimizer.zero_grad()
 
             coords = batch_data.xyz
             d_target = torch.tensor(torch.cdist(coords, coords)).float().to(self.device)
@@ -44,10 +45,10 @@ class Mol3DTrainer():
         return loss_total / i
 
 
-    def save_ckpt(self, epoch, model, best_valid=False):
+    def save_ckpt(self, epoch, model, optimizer, best_valid=False):
         checkpoint = {
             'model': model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
+            'optimizer': optimizer.state_dict(),
             'epoch': epoch,
         }
         if best_valid:
@@ -79,11 +80,13 @@ class Mol3DTrainer():
                     best_val_rmse = val_rmse
                     best_val_edm = val_edm
                     best_val_coords = val_coords
-                    self.save_ckpt(i, best_valid=True)
+                    if self.out_path is not None:
+                        self.save_ckpt(i, model, optimizer, best_valid=True)
 
             # Or we can save model at each epoch
             elif i % self.configs['save_ckpt'] == 0:
-                self.save_ckpt(i, best_valid=False)
+                if self.out_path is not None:
+                    self.save_ckpt(i, model, optimizer, best_valid=False)
 
             if i % self.configs['lr_decay_step_size'] == 0:
                 for param_group in optimizer.param_groups:
