@@ -8,12 +8,14 @@ from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
 
 
 class Deepergcn_dagnn_dist(torch.nn.Module):
-    def __init__(self, num_layers, emb_dim, drop_ratio=0.5, JK="last", aggr='softmax', norm='batch'):
+    def __init__(self, num_layers, emb_dim, drop_ratio=0.5, 
+                 JK="last", aggr='softmax', norm='batch', 
+                 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
         super(Deepergcn_dagnn_dist, self).__init__()
 
         self.deepergcn_dagnn = DeeperDAGNN_node_Virtualnode(num_layers, emb_dim, drop_ratio, JK, aggr, norm)
         self.fc = torch.nn.Linear(in_features=emb_dim, out_features=1)
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device
 
     def forward(self, batched_data, train=False):
         xs = self.deepergcn_dagnn(batched_data)

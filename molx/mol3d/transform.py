@@ -15,17 +15,17 @@ class TransformPred3D(torch.nn.Module):
     def forward(self, data):
         in_device = data.x.device
         batch_data = Batch.from_data_list([data])
-        if device is not None:
+        if self.device is not None:
             batch_data.to(self.device)
             self.model3d.to(self.device)
             
+        self.model3d.eval()
         pred, _, _ = self.model3d(batch_data)
         pred = pred.detach()
-        dist_index = torch.nonzero(pred, as_tuple=False)
+        dist_index = torch.nonzero(pred, as_tuple=False).T
         dist_weight = pred[torch.nonzero(pred, as_tuple=True)]
         
         transformed = data.clone()
-        transformed.__delitem__('props')
         transformed.__setitem__('dist_index', dist_index.to(in_device))
         transformed.__setitem__('dist_weight', dist_weight.to(in_device))
         transformed.__setitem__('y', data.props[self.target_id])
@@ -41,7 +41,6 @@ class TransformGT3D():
         
     def __call__(self, data):
         transformed = data.clone()
-        transformed.__delitem__('props')
         transformed.__setitem__('y', data.props[self.target_id])
         return transformed
     
@@ -62,5 +61,4 @@ class TransformRDKit3D():
         transformed = data.clone()
         transformed.__setitem__('xyz', data.__getitem__(orig_key))
         transformed.__setitem__('y', data.props[self.target_id])
-        transformed.__delitem__('props')
         return transformed
