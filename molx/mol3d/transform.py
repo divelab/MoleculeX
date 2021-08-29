@@ -20,6 +20,7 @@ class TransformPred3D(torch.nn.Module):
             self.model3d.to(self.device)
             
         pred, _, _ = self.model3d(batch_data)
+        pred = pred.detach()
         dist_index = torch.nonzero(pred, as_tuple=False)
         dist_weight = pred[torch.nonzero(pred, as_tuple=True)]
         
