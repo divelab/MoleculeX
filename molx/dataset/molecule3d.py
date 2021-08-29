@@ -59,21 +59,12 @@ class Molecule3D(InMemoryDataset):
         self.split_mode = split_mode
         self.root = root
         self.name = 'Molecule3D'
-
-        super(Molecule3D, self).__init__(root, transform, pre_transform, pre_filter)
-#         assert osp.exists(self.raw_paths[0]), "Please manually download the raw data."
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
+        super(Molecule3D, self).__init__(root, transform, pre_transform, pre_filter)
         
         self.data, self.slices = torch.load(
             osp.join(self.processed_dir, '{}_{}.pt'.format(split_mode, split)))
-
-#         if split == 'train':
-#             self.data, self.slices = torch.load(self.processed_paths[0])
-#         elif split == 'val':
-#             self.data, self.slices = torch.load(self.processed_paths[1])
-#         elif split == 'test':
-#             self.data, self.slices = torch.load(self.processed_paths[2])
     
     @property
     def num_node_labels(self):
@@ -252,6 +243,7 @@ class Molecule3DProps(InMemoryDataset):
                  transform=None,
                  pre_transform=None,
                  pre_filter=None,
+                 process_dir_base='processed_downstream',
                  ):
         
         assert split in ['train', 'val', 'test']
@@ -259,12 +251,12 @@ class Molecule3DProps(InMemoryDataset):
         self.split_mode = split_mode
         self.root = root
         self.name = 'Molecule3D'
+        self.process_dir_base = process_dir_base
 
-        super(Molecule3DProps, self).__init__(root, transform, pre_transform, pre_filter)
-        assert osp.exists(self.raw_paths[0]), "Please manually download the raw data."
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
-
+        super(Molecule3DProps, self).__init__(root, transform, pre_transform, pre_filter)
+        
         if split == 'train':
             self.data, self.slices = torch.load(self.processed_paths[0])
         elif split == 'val':
@@ -303,7 +295,8 @@ class Molecule3DProps(InMemoryDataset):
     
     @property
     def processed_dir(self):
-        return osp.join(self.root, self.name, 'processed_downstream_{}'.format(self.split_mode))
+        return osp.join(self.root, self.name, 
+                        '{}_{}'.format(self.process_dir_base, self.split_mode))
 
     @property
     def raw_file_names(self):
