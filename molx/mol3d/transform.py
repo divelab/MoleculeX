@@ -6,10 +6,11 @@ class TransformPred3D(torch.nn.Module):
     """ Converting :obj:`torch_geometric.data.Data` objects into 3d versions
     using 3d prediction models.
     """
-    def __init__(self, model3d=None, device=None):
+    def __init__(self, model3d, target_id=0, device=None):
         super(TransformPred3D, self).__init__()
         self.model3d = model3d
         self.device = device
+        self.target_id = target_id
         
     def forward(self, data):
         in_device = data.x.device
@@ -23,8 +24,10 @@ class TransformPred3D(torch.nn.Module):
         dist_weight = pred[torch.nonzero(pred, as_tuple=True)]
         
         transformed = data.clone()
+        transformed.__delitem__('props')
         transformed.__setitem__('dist_index', dist_index.to(in_device))
         transformed.__setitem__('dist_weight', dist_weight.to(in_device))
+        transformed.__setitem__('y', data.props[self.target_id])
         return transformed
     
     
@@ -32,14 +35,13 @@ class TransformGT3D():
     """ Converting datasets containing 3d groundtruths into accepted format
     by downstream 3D networks.
     """
-    def __init__(self, key_mapping):
-        self.key_mapping = key_mapping
+    def __init__(self, target_id=0):
+        self.target_id = target_id
         
     def __call__(self, data):
         transformed = data.clone()
-        for orig_key, target_key in key_mapping.items():
-            transformed.__delitem__(orig_key)
-            transformed.__setitem__(target_key, data.__getitem__(orig_key))
+        transformed.__delitem__('props')
+        transformed.__setitem__('y', data.props[self.target_id])
         return transformed
     
 
@@ -47,7 +49,8 @@ class TransformRDKit3D():
     """ Converting :obj:`torch_geometric.data.Data` objects containing SMILES 
     attribute into 3d versions using RDKit.
     """
-    def __init__(self, conf_id=-1):
+    def __init__(self, target_id=0, conf_id=-1):
+        self.target_id = target_id
         self.conf_id = conf_id
     
     def __call__(self, data):
@@ -57,4 +60,6 @@ class TransformRDKit3D():
         
         transformed = data.clone()
         transformed.__setitem__('xyz', data.__getitem__(orig_key))
+        transformed.__setitem__('y', data.props[self.target_id])
+        transformed.__delitem__('props')
         return transformed

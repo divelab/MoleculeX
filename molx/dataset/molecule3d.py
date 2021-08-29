@@ -65,10 +65,6 @@ class Molecule3D(InMemoryDataset):
         assert osp.exists(self.raw_paths[0]), "Please manually download the raw data."
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
-        if osp.exists(self.processed_paths[0]):
-            self.data, self.slices = torch.load(self.processed_paths[0])
-        else:
-            self.process()
 
         if split == 'train':
             self.data, self.slices = torch.load(self.processed_paths[0])
@@ -156,7 +152,7 @@ class Molecule3D(InMemoryDataset):
                 data.edge_index = torch.from_numpy(graph['edge_index']).to(torch.int64)
                 data.edge_attr = torch.from_numpy(graph['edge_feat']).to(torch.int64)
                 data.x = torch.from_numpy(graph['node_feat']).to(torch.int64)
-                data.y = torch.FloatTensor(target_df.values[abs_idx, 1:])
+                data.props = torch.FloatTensor(target_df.iloc[abs_idx,1:].values)
                 data.smiles = smiles
                 
                 # Required by Schnet
