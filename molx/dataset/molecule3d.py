@@ -52,27 +52,28 @@ class Molecule3D(InMemoryDataset):
                  transform=None,
                  pre_transform=None,
                  pre_filter=None,
-                 processed_filename='data.pt',
                  ):
         
         assert split in ['train', 'val', 'test']
         assert split_mode in ['random', 'scaffod']
         self.split_mode = split_mode
-        self.processed_filename = processed_filename
         self.root = root
         self.name = 'Molecule3D'
 
         super(Molecule3D, self).__init__(root, transform, pre_transform, pre_filter)
-        assert osp.exists(self.raw_paths[0]), "Please manually download the raw data."
+#         assert osp.exists(self.raw_paths[0]), "Please manually download the raw data."
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
+        
+        self.data, self.slices = torch.load(
+            osp.join(self.processed_dir, '{}_{}.pt'.format(split_mode, split)))
 
-        if split == 'train':
-            self.data, self.slices = torch.load(self.processed_paths[0])
-        elif split == 'val':
-            self.data, self.slices = torch.load(self.processed_paths[1])
-        elif split == 'test':
-            self.data, self.slices = torch.load(self.processed_paths[2])
+#         if split == 'train':
+#             self.data, self.slices = torch.load(self.processed_paths[0])
+#         elif split == 'val':
+#             self.data, self.slices = torch.load(self.processed_paths[1])
+#         elif split == 'test':
+#             self.data, self.slices = torch.load(self.processed_paths[2])
     
     @property
     def num_node_labels(self):
@@ -114,7 +115,8 @@ class Molecule3D(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return self.processed_filename
+        return ['random_train.pt', 'random_val.pt', 'random_test.pt',
+                'scaffold_train.pt', 'scaffold_val.pt', 'scaffold_test.pt']
     
     def download(self):
         # print('making raw files:', self.raw_dir)
@@ -162,23 +164,24 @@ class Molecule3D(InMemoryDataset):
             of virtual node and edge feature.
         """
         full_list = self.pre_process()
-        
-        ind_path = osp.join(self.raw_dir, '{}_split_inds.json').format(self.split_mode)
-        with open(ind_path, 'r') as f:
-             inds = json.load(f)
                 
         print('making processed files:', self.processed_dir)
         if not osp.exists(self.processed_dir):
             os.makedirs(self.processed_dir)
+                
+        for m, split_mode in enumerate(['random', 'scaffold']):
+            ind_path = osp.join(self.raw_dir, '{}_split_inds.json').format(self.split_mode)
+            with open(ind_path, 'r') as f:
+                 inds = json.load(f)
             
-        for s, split in enumerate(['train', 'valid', 'test']):
-            data_list = [full_list[idx] for idx in ind[split]]
-            if self.pre_filter is not None:
-                data_list = [data for data in data_list if self.pre_filter(data)]
-            if self.pre_transform is not None:
-                data_list = [self.pre_transform(data) for data in data_list]
+            for s, split in enumerate(['train', 'valid', 'test']):
+                data_list = [full_list[idx] for idx in inds[split]]
+                if self.pre_filter is not None:
+                    data_list = [data for data in data_list if self.pre_filter(data)]
+                if self.pre_transform is not None:
+                    data_list = [self.pre_transform(data) for data in data_list]
 
-            torch.save(self.collate(data_list), self.processed_paths[s])
+                torch.save(self.collate(data_list), self.processed_paths[s+3*m])
             
         
     def __repr__(self):
@@ -249,12 +252,10 @@ class Molecule3DProps(InMemoryDataset):
                  transform=None,
                  pre_transform=None,
                  pre_filter=None,
-                 processed_filename='data.pt',
                  ):
         
         assert split in ['train', 'val', 'test']
         assert split_mode in ['random', 'scaffod']
-        self.processed_filename = processed_filename
         self.split_mode = split_mode
         self.root = root
         self.name = 'Molecule3D'
@@ -302,7 +303,7 @@ class Molecule3DProps(InMemoryDataset):
     
     @property
     def processed_dir(self):
-        return osp.join(self.root, self.name, 'processed_downstream')
+        return osp.join(self.root, self.name, 'processed_downstream_{}'.format(self.split_mode))
 
     @property
     def raw_file_names(self):
@@ -311,7 +312,7 @@ class Molecule3DProps(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return self.processed_filename
+        return ['train.pt', 'val.pt', 'test.pt']
     
     def download(self):
         # print('making raw files:', self.raw_dir)
@@ -387,7 +388,7 @@ class Molecule3DProps(InMemoryDataset):
             os.makedirs(self.processed_dir)
             
         for s, split in enumerate(['train', 'valid', 'test']):
-            data_list = [full_list[idx] for idx in ind[split]]
+            data_list = [full_list[idx] for idx in inds[split]]
             if self.pre_filter is not None:
                 data_list = [data for data in data_list if self.pre_filter(data)]
             if self.pre_transform is not None:
