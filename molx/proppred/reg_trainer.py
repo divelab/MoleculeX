@@ -2,13 +2,16 @@ import os
 import torch
 import numpy as np
 from tqdm import tqdm
+from torch_geometric.data import DataLoader
 
 
 class RegTrainer():
-    def __init__(self, loader, val_loader, configs, device):
+    def __init__(self, train_dataset, val_dataset, configs, device):
         self.configs = configs
-        self.train_loader = loader
-        self.val_loader = val_loader
+        self.train_dataset = train_dataset
+        self.val_dataset = val_dataset
+        self.train_loader = DataLoader(train_dataset, batch_size=configs['batch_size'])
+        self.val_loader = DataLoader(val_dataset, batch_size=configs['batch_size'])
         self.target = configs['target']
         self.geoinput = configs['geoinput']
         self.metric = configs['metric']
@@ -44,7 +47,7 @@ class RegTrainer():
             else:
                 raise NameError('Must use gt, rdkit, 2d or pred for edm in arguments!')
 
-            loss = criterion(preds.view(-1), batch_data.y[:, self.target])
+            loss = criterion(preds.view(-1), batch_data.y)
 
             loss.backward()
             optimizer.step()
@@ -54,7 +57,7 @@ class RegTrainer():
             self.step += 1
 
             if self.step % self.configs['lr_decay_step_size'] == 0:
-                for param_group in self.optimizer.param_groups:
+                for param_group in optimizer.param_groups:
                     param_group['lr'] = self.configs['lr_decay_factor'] * param_group['lr']
 
         return sum(losses).item()/i
@@ -73,6 +76,12 @@ class RegTrainer():
 
 
     def train(self, model):
+        if self.configs['out_path'] is not None:
+            try:
+                os.makedirs(self.configs['out_path'])
+            except OSError:
+                pass
+
         optimizer = torch.optim.Adam(model.parameters(), lr=self.configs['lr'], weight_decay=self.configs['weight_decay'])
         criterion = torch.nn.L1Loss()
         if 'load_path' in self.configs and self.configs['load_path'] is not None:
@@ -108,11 +117,12 @@ class RegTrainer():
 
 
 
-def eval_reg(model, dataloader, metric, target, geoinput):
+def eval_reg(model, dataset, metric, geoinput):
+    dataloader = DataLoader(dataset, batch_size=20)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.eval()
     errors = 0.
-    for batch_data in dataloader:
+    for batch_data in tqdm(dataloader, total=len(dataloader)):
         batch_data = batch_data.to(device)
         with torch.no_grad():
 
@@ -132,16 +142,17 @@ def eval_reg(model, dataloader, metric, target, geoinput):
                 raise NameError('Must use gt, rdkit, pred or 2d for geoinput in arguments!')
 
         if metric == 'mae':
-            mae_sum = ((pred.view(-1) - batch_data.y[:, target]).abs()).sum()
+            mae_sum = ((pred.view(-1) - batch_data.y).abs()).sum()
             errors += mae_sum.cpu().detach().numpy()
         elif metric == 'rmse':
-            mse_sum = (torch.square((pred.view(-1) - batch_data.y[:, target]))).sum()
+            mse_sum = (torch.square((pred.view(-1) - batch_data.y))).sum()
             errors += mse_sum.cpu().detach().numpy()
 
     if metric == 'mae':
-        out = errors / len(dataloader)
+        out = errors / len(dataset)
     elif metric == 'rmse':
-        out = np.sqrt(errors / len(dataloader))
-
+        out = np.sqrt(errors / len(dataset))
+    
+    print('{}: {:.3f}'.format(metric, out))
     return out
 

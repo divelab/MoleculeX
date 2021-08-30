@@ -1,7 +1,8 @@
 import os
 import torch
-from torch_geometric.data import DataLoader
 import numpy as np
+from tqdm import tqdm
+from torch_geometric.data import DataLoader
 from .utils import generate_xyz
 
 
@@ -28,7 +29,7 @@ class Mol3DTrainer():
         model.train()
         loss_total = 0
         i = 0
-        for batch_data in self.train_loader:
+        for batch_data in tqdm(self.train_loader, total=len(self.train_loader)):
             optimizer.zero_grad()
 
             coords = batch_data.xyz
@@ -42,7 +43,6 @@ class Mol3DTrainer():
             loss.backward()
             optimizer.step()
             loss_total += loss.item()
-            print('iter: ', i, 'loss: ', loss.item())
             i += 1
 
         return loss_total / i
@@ -61,6 +61,12 @@ class Mol3DTrainer():
 
 
     def train(self, model):
+        if self.configs['out_path'] is not None:
+            try:
+                os.makedirs(self.configs['out_path'])
+            except OSError:
+                pass
+            
         optimizer = torch.optim.Adam(model.parameters(), lr=self.configs['lr'], weight_decay=self.configs['weight_decay'])
         criterion = self._get_loss()
         if 'load_pth' in self.configs and self.configs['load_pth'] is not None:
@@ -114,7 +120,7 @@ def eval3d(model, dataset):
     mses, maes = 0., 0.
     total_dist_counts, fail_edm_counts, fail_3d_counts = 0, 0, 0
     i = 0
-    for batch_data in dataloader:
+    for batch_data in tqdm(dataloader, total=len(dataset)):
 
         coords = batch_data.xyz
         d_target = torch.cdist(coords, coords).float().to(device)
