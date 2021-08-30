@@ -156,13 +156,8 @@ class DeeperDAGNN_node_Virtualnode(torch.nn.Module):
     def forward(self, batched_data):
         x, edge_index, edge_attr, batch = batched_data.x, batched_data.edge_index, batched_data.edge_attr, batched_data.batch
 
-        ### computing input node embedding
-        try:
-            edge_attr = self.bond_encoder(edge_attr)
-            h = self.atom_encoder(x)
-        except:
-            edge_attr = self.bond_encoder(edge_attr.float())
-            h = self.atom_encoder(x.float())
+        edge_attr = self.bond_encoder(edge_attr)
+        h = self.atom_encoder(x)
 
         h_list = []
 
