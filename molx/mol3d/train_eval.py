@@ -1,14 +1,17 @@
 import os
 import torch
+from torch_geometric.data import DataLoader
 import numpy as np
 from .utils import generate_xyz
 
 
 class Mol3DTrainer():
-    def __init__(self, loader, val_loader, configs, device):
+    def __init__(self, train_dataset, val_dataset, configs, device):
         self.configs = configs
-        self.train_loader = loader
-        self.val_loader = val_loader
+        self.train_dataset = train_dataset
+        self.val_dataset = val_dataset
+        self.train_loader = DataLoader(train_dataset, batch_size=configs['batch_size'])
+        self.val_loader = DataLoader(val_dataset, batch_size=configs['batch_size'])
         self.out_path = configs['out_path']
         self.start_epoch = 1
         self.device = device
@@ -29,7 +32,7 @@ class Mol3DTrainer():
             optimizer.zero_grad()
 
             coords = batch_data.xyz
-            d_target = torch.tensor(torch.cdist(coords, coords)).float().to(self.device)
+            d_target = torch.cdist(coords, coords).float().to(self.device)
 
             batch_data = batch_data.to(self.device)
             mask_d_pred, mask, dist_count = model(batch_data, train=True)
@@ -39,7 +42,7 @@ class Mol3DTrainer():
             loss.backward()
             optimizer.step()
             loss_total += loss.item()
-            # print('iter: ', i, 'loss: ', loss.item())
+            print('iter: ', i, 'loss: ', loss.item())
             i += 1
 
         return loss_total / i
@@ -69,8 +72,8 @@ class Mol3DTrainer():
         best_val_mae = 10000
         epoch_bvl = 0
         for i in range(self.start_epoch, self.configs['epochs']+1):
-            loss_dist = self._train_loss(self.train_loader, optimizer, criterion)
-            val_mae, val_rmse, val_edm, val_coords = eval3d(model, self.val_loader)
+            loss_dist = self._train_loss(model, optimizer, criterion)
+            val_mae, val_rmse, val_edm, val_coords = eval3d(model, self.val_dataset)
 
             # One possible way to selection model: do testing when val metric is best
             if self.configs['save_ckpt'] == "best_valid":
@@ -104,7 +107,8 @@ class Mol3DTrainer():
         return model
 
 
-def eval3d(model, dataloader):
+def eval3d(model, dataset):
+    dataloader = DataLoader(dataset, batch_size=20)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.eval()
     mses, maes = 0., 0.
@@ -113,7 +117,7 @@ def eval3d(model, dataloader):
     for batch_data in dataloader:
 
         coords = batch_data.xyz
-        d_target = torch.tensor(torch.cdist(coords, coords)).float().to(device)
+        d_target = torch.cdist(coords, coords).float().to(device)
 
         batch_data = batch_data.to(device)
         with torch.no_grad():
@@ -137,6 +141,8 @@ def eval3d(model, dataloader):
 
     rmse = np.sqrt(mses / total_dist_counts)
     mae = maes / total_dist_counts
-    valid_edm_percent = 1 - fail_edm_counts / len(dataloader)
-    valid_3d_coords = 1 - fail_3d_counts / len(dataloader)
+    valid_edm_percent = 1 - fail_edm_counts / len(dataset)
+    valid_3d_coords = 1 - fail_3d_counts / len(dataset)
+    print('MAE: {:.3f}, RMSE: {:.3f}, Validity: {:.2f}%, Validity3D: {:.2f}%'
+          .format(mae, rmse, valid_edm_percent*100, valid_3d_coords*100))
     return mae, rmse, valid_edm_percent, valid_3d_coords
