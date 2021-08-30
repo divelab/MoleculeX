@@ -1,5 +1,7 @@
 import torch
 from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit.Chem.rdmolfiles import SmilesParserParams
 from torch_geometric.data import Data, Batch
 
 class TransformPred3D(torch.nn.Module):
@@ -54,11 +56,17 @@ class TransformRDKit3D():
         self.conf_id = conf_id
     
     def __call__(self, data):
-        mol = Chem.MolFromSmiles(data.smiles)
-        coords = mol.GetConformer(self.conf_id).GetPositions()
-        xyz = torch.tensor(coords, dtype=torch.float32)
+        params = SmilesParserParams()
+        params.removeHs = False
+        mol = Chem.MolFromSmiles(data.smiles[0], params=params)
+        try:
+            AllChem.EmbedMolecule(mol)
+            coords = mol.GetConformer(self.conf_id).GetPositions()
+            xyz = torch.tensor(coords, dtype=torch.float32)
+        except:
+            return None
         
         transformed = data.clone()
-        transformed.__setitem__('xyz', data.__getitem__(orig_key))
+        transformed.__setitem__('xyz', xyz)
         transformed.__setitem__('y', data.props[self.target_id])
         return transformed

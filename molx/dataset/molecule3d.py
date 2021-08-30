@@ -385,7 +385,9 @@ class Molecule3DProps(InMemoryDataset):
             if self.pre_filter is not None:
                 data_list = [data for data in data_list if self.pre_filter(data)]
             if self.pre_transform is not None:
-                data_list = [self.pre_transform(data) for data in data_list]
+                data_list = [self.pre_transform(data) for data in 
+                             tqdm(data_list, desc="Pre-transform {}".format(split))]
+                data_list = list(filter(None, data_list))
 
             torch.save(self.collate(data_list), self.processed_paths[s])
             
