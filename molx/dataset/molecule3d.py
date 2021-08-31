@@ -55,7 +55,7 @@ class Molecule3D(InMemoryDataset):
                  ):
         
         assert split in ['train', 'val', 'test']
-        assert split_mode in ['random', 'scaffod']
+        assert split_mode in ['random', 'scaffold']
         self.split_mode = split_mode
         self.root = root
         self.name = 'Molecule3D'
@@ -247,7 +247,7 @@ class Molecule3DProps(InMemoryDataset):
                  ):
         
         assert split in ['train', 'val', 'test']
-        assert split_mode in ['random', 'scaffod']
+        assert split_mode in ['random', 'scaffold']
         self.split_mode = split_mode
         self.root = root
         self.name = 'Molecule3D'
