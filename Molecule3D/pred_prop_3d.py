@@ -40,7 +40,7 @@ conf['aggr'] = 'softmax'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if conf['geoinput'] == 'pred':
-    geo_model = Deepergcn_dagnn_dist(num_layers=conf['depth'], emb_dim=conf['hidden'], drop_ratio=conf['dropout'], 
+    geo_model = Deepergcn_dagnn_dist(num_layers=conf['depth'], emb_dim=conf['emb_dim'], drop_ratio=conf['dropout'], 
         JK=conf['JK'], aggr=conf['aggr'], norm=conf['norm']).to(device)
     transform=TransformPred3D(geo_model, target_id=conf['target'], device=device)
 elif conf['geoinput'] == 'gt':
@@ -54,6 +54,6 @@ val_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=tran
 trainer = RegTrainer(train_dataset, val_dataset, conf, device)
 model = SchNet(hidden_channels=conf['hidden_channels'], num_filters=conf['num_filters'], num_interactions=conf['num_interactions'],
     num_gaussians=conf['num_gaussians'], cutoff=conf['cutoff'], readout=conf['readout'], dipole=conf['dipole'],
-    mean=conf['mean'], std=conf['std'], atomref=conf['atomref'])
+    mean=conf['mean'], std=conf['std'], atomref=conf['atomref']).to(device)
 model = trainer.train(model)
 eval_reg(model, val_dataset, conf['metric'], conf['geoinput'])
