@@ -19,6 +19,7 @@ conf['save_ckpt'] = 'best_valid'
 conf['norm'] = 'batch'
 conf['JK'] = 'last'
 conf['out_path'] = 'results/exp0/'
+conf['split'] = 'random' #'scaffold'
 conf['criterion'] = 'mse'
 
 

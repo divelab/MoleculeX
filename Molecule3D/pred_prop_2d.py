@@ -18,6 +18,7 @@ conf['target'] = 0
 conf['geoinput'] = '2d'
 conf['metric'] = 'mae'
 conf['out_path'] = 'pred_prop_results'
+conf['split'] = 'random' #'scaffold'
 
 conf['hidden_channels'] = 128
 conf['num_filters'] = 128
@@ -41,8 +42,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 transform = TransformGT3D(target_id=conf['target'])
 
-train_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='train', split_mode='random')
-val_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='val', split_mode='random')
+train_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='train', split_mode=conf['split'])
+val_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='val', split_mode=conf['split'])
 
 trainer = RegTrainer(train_dataset, val_dataset, conf, device)
 model = SchNet2D(hidden_channels=conf['hidden_channels'], num_filters=conf['num_filters'], num_interactions=conf['num_interactions'],

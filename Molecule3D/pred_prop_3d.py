@@ -16,8 +16,10 @@ conf['batch_size'] = 20
 conf['save_ckpt'] = 'best_valid'
 conf['target'] = 0
 conf['geoinput'] = 'pred'
+conf['geo_model_path'] = 'results/exp0/ckpt_best_val.pth'
 conf['metric'] = 'mae'
 conf['out_path'] = 'pred_prop_results'
+conf['split'] = 'random' #'scaffold'
 
 conf['hidden_channels'] = 128
 conf['num_filters'] = 128
@@ -42,14 +44,16 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 if conf['geoinput'] == 'pred':
     geo_model = Deepergcn_dagnn_dist(num_layers=conf['depth'], emb_dim=conf['emb_dim'], drop_ratio=conf['dropout'], 
         JK=conf['JK'], aggr=conf['aggr'], norm=conf['norm']).to(device)
+    geo_model_ckpt = torch.load(conf['geo_model_path'])
+    geo_model.load_state_dict(geo_model_ckpt['model'])
     transform=TransformPred3D(geo_model, target_id=conf['target'], device=device)
 elif conf['geoinput'] == 'gt':
     transform = TransformGT3D(target_id=conf['target'])
 elif conf['geoinput'] == 'rdkit':
     transform = TransformRDKit3D(target_id=conf['target'])
 
-train_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='train', split_mode='random')
-val_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='val', split_mode='random')
+train_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='train', split_mode=conf['split'])
+val_dataset = Molecule3DProps(root='/mnt/data/shared/Molecule3D', transform=transform, split='val', split_mode=conf['split'])
 
 trainer = RegTrainer(train_dataset, val_dataset, conf, device)
 model = SchNet(hidden_channels=conf['hidden_channels'], num_filters=conf['num_filters'], num_interactions=conf['num_interactions'],
