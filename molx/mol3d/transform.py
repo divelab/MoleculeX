@@ -2,6 +2,7 @@ import torch
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.rdmolfiles import SmilesParserParams
+from rdkit import RDLogger
 from torch_geometric.data import Data, Batch
 
 class TransformPred3D(torch.nn.Module):
@@ -49,16 +50,19 @@ class TransformGT3D():
 
 class TransformRDKit3D():
     """ Converting :obj:`torch_geometric.data.Data` objects containing SMILES 
-    attribute into 3d versions using RDKit.
+    attribute into 3d versions using RDKit APIs.
     """
     def __init__(self, target_id=0, conf_id=-1):
+        RDLogger.DisableLog('rdApp.*')
         self.target_id = target_id
         self.conf_id = conf_id
     
     def __call__(self, data):
         params = SmilesParserParams()
         params.removeHs = False
-        mol = Chem.MolFromSmiles(data.smiles[0], params=params)
+        smiles = data.smiles
+        smiles = smiles if isinstance(smiles, str) else smiles[0]
+        mol = Chem.MolFromSmiles(smiles, params=params)
         try:
             AllChem.EmbedMolecule(mol)
             coords = mol.GetConformer(self.conf_id).GetPositions()
