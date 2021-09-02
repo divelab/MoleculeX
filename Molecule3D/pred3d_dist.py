@@ -1,7 +1,4 @@
 import torch
-import sys
-sys.path.insert(1, '/mnt/data/shared/zhaoxu/workspace/MoleculeX/')
-
 from molx.dataset import Molecule3D
 from molx.model import Deepergcn_dagnn_dist, Deepergcn_dagnn_coords, SchNet, SchNet2D
 from molx.mol3d import Mol3DTrainer, eval3d
@@ -31,9 +28,7 @@ val_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, sp
 test_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, split='test', split_mode=conf['split'])
 model = Deepergcn_dagnn_dist(num_layers=conf['depth'], emb_dim=conf['hidden'], drop_ratio=conf['dropout'], JK="last", aggr='softmax', norm='batch').to(device)
 
-print('start train')
 trainer = Mol3DTrainer(train_dataset, val_dataset, conf,
                        device=device)
 model = trainer.train(model)
-print('start evaluate')
 eval3d(model, test_dataset)
