@@ -161,7 +161,7 @@ class Molecule3D(InMemoryDataset):
             os.makedirs(self.processed_dir)
                 
         for m, split_mode in enumerate(['random', 'scaffold']):
-            ind_path = osp.join(self.raw_dir, '{}_split_inds.json').format(self.split_mode)
+            ind_path = osp.join(self.raw_dir, '{}_split_inds.json').format(split_mode)
             with open(ind_path, 'r') as f:
                  inds = json.load(f)
             
