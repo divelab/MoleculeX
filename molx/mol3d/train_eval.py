@@ -120,7 +120,7 @@ def eval3d(model, dataset):
     mses, maes = 0., 0.
     total_dist_counts, fail_edm_counts, fail_3d_counts = 0, 0, 0
     i = 0
-    for batch_data in tqdm(dataloader, total=len(dataset)):
+    for batch_data in tqdm(dataloader, total=len(dataloader), ncols=80):
 
         coords = batch_data.xyz
         d_target = torch.cdist(coords, coords).float().to(device)
@@ -149,6 +149,4 @@ def eval3d(model, dataset):
     mae = maes / total_dist_counts
     valid_edm_percent = 1 - fail_edm_counts / len(dataset)
     valid_3d_coords = 1 - fail_3d_counts / len(dataset)
-    print('MAE: {:.3f}, RMSE: {:.3f}, Validity: {:.2f}%, Validity3D: {:.2f}%'
-          .format(mae, rmse, valid_edm_percent*100, valid_3d_coords*100))
     return mae, rmse, valid_edm_percent, valid_3d_coords
