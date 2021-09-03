@@ -37,6 +37,6 @@ setuptools.setup(
     python_requires='>=3.6',
     setup_requires=setup_requires,
 #     tests_require=tests_require,
-    extras_require={'test': tests_require},
+#     extras_require={'test': tests_require},
 #     include_package_data=True
 )
