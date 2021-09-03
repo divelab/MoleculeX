@@ -59,6 +59,7 @@ class Molecule3D(InMemoryDataset):
         self.split_mode = split_mode
         self.root = root
         self.name = 'Molecule3D'
+        self.target_df = pd.read_csv(osp.join(self.raw_dir, 'properties.csv'))
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
         super(Molecule3D, self).__init__(root, transform, pre_transform, pre_filter)
@@ -166,7 +167,7 @@ class Molecule3D(InMemoryDataset):
                  inds = json.load(f)
             
             for s, split in enumerate(['train', 'valid', 'test']):
-                data_list = [full_list[idx] for idx in inds[split]]
+                data_list = [self.get_data_prop(full_list, idx, split) for idx in inds[split]]
                 if self.pre_filter is not None:
                     data_list = [data for data in data_list if self.pre_filter(data)]
                 if self.pre_transform is not None:
@@ -174,6 +175,11 @@ class Molecule3D(InMemoryDataset):
 
                 torch.save(self.collate(data_list), self.processed_paths[s+3*m])
             
+    def get_data_prop(self, full_list, abs_idx, split):
+        data = full_list[abs_idx]
+        if split == 'test':
+            data.props = torch.FloatTensor(self.target_df.iloc[abs_idx,1:].values)
+        return data
         
     def __repr__(self):
         return '{}({})'.format(self.name, len(self))
@@ -234,6 +240,11 @@ class Molecule3DProps(InMemoryDataset):
                 :obj:`torch_geometric.data.Data` object and returns a boolean
                 value, indicating whether the data object should be included in the
                 final dataset. (default: :obj:`None`)
+            process_dir_base (string, optional): target directory to store your processed data. Should use 
+                different dir when using different :obj:`pre_transform' functions.
+            test_pt_dir (string, optional): If you already called :obj:`Molecule3D' and have raw data 
+                pre-processed, set :obj:`test_pt_dir` to the folder name where test data file is stored.
+                Usually stored in "processed".
         """
     
     def __init__(self,
@@ -244,6 +255,7 @@ class Molecule3DProps(InMemoryDataset):
                  pre_transform=None,
                  pre_filter=None,
                  process_dir_base='processed_downstream',
+                 test_pt_dir=None
                  ):
         
         assert split in ['train', 'val', 'test']
@@ -252,6 +264,7 @@ class Molecule3DProps(InMemoryDataset):
         self.root = root
         self.name = 'Molecule3D'
         self.process_dir_base = process_dir_base
+        self.test_pt_dir = test_pt_dir
 
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
@@ -361,7 +374,7 @@ class Molecule3DProps(InMemoryDataset):
                 data.z = torch.tensor(z, dtype=torch.int64)
                 data_list.append(data)
                 
-        return data_list
+        return self.collate(data_list)
     
     
     def process(self):
@@ -370,7 +383,13 @@ class Molecule3DProps(InMemoryDataset):
             If one-hot format is required, the processed data type will include an extra dimension 
             of virtual node and edge feature.
         """
-        full_list = self.pre_process()
+        if self.test_pt_dir is not None:
+            test_path = osp.join(self.root, self.name, self.test_pt_dir,
+                                 '{}_test.pt'.format(self.split_mode))
+            print('Loading pre-processed data from: {}...'.format(test_path))
+            self.data, self.slices = torch.load(test_path)
+        else:
+            self.data, self.slices = self.pre_process()
         
         ind_path = osp.join(self.raw_dir, '{}_test_split_inds.json').format(self.split_mode)
         with open(ind_path, 'r') as f:
@@ -381,7 +400,7 @@ class Molecule3DProps(InMemoryDataset):
             os.makedirs(self.processed_dir)
             
         for s, split in enumerate(['train', 'valid', 'test']):
-            data_list = [full_list[idx] for idx in inds[split]]
+            data_list = [self.get(idx) for idx in inds[split]]
             if self.pre_filter is not None:
                 data_list = [data for data in data_list if self.pre_filter(data)]
             if self.pre_transform is not None:
