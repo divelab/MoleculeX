@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/divelab/MoleculeX",
-    packages=["molx"],
+    packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -37,6 +37,6 @@ setuptools.setup(
     python_requires='>=3.6',
     setup_requires=setup_requires,
 #     tests_require=tests_require,
-    extras_require={'test': tests_require},
+#     extras_require={'test': tests_require},
 #     include_package_data=True
 )
