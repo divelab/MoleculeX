@@ -1,5 +1,4 @@
 import torch
-
 from molx.dataset import Molecule3D
 from molx.model import Deepergcn_dagnn_dist, Deepergcn_dagnn_coords, SchNet, SchNet2D
 from molx.mol3d import Mol3DTrainer, eval3d
@@ -22,14 +21,14 @@ conf['out_path'] = 'results/exp0/'
 conf['split'] = 'random' #'scaffold'
 conf['criterion'] = 'mse'
 
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-train_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, split='train', split_mode='random')
-val_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, split='val', split_mode='random')
+train_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, split='train', split_mode=conf['split'])
+val_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, split='val', split_mode=conf['split'])
+test_dataset = Molecule3D(root='/mnt/data/shared/Molecule3D/', transform=None, split='test', split_mode=conf['split'])
 model = Deepergcn_dagnn_dist(num_layers=conf['depth'], emb_dim=conf['hidden'], drop_ratio=conf['dropout'], JK="last", aggr='softmax', norm='batch').to(device)
 
 trainer = Mol3DTrainer(train_dataset, val_dataset, conf,
                        device=device)
 model = trainer.train(model)
-eval3d(model, val_dataset)
+eval3d(model, test_dataset)

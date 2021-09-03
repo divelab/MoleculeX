@@ -15,7 +15,7 @@ The following dependencies are required to be installed:
 Then you can install the moleculex package by the following command:
 
 ```
-pip install moleculex
+pip install moleculex==0.0.3
 ```
 
 ## Running Baseline Methods
