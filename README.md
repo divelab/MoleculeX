@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/divelab/MoleculeX/blob/molx/imgs/MX-logo.jpg" width="500" class="center" alt="logo"/>
+<img src="https://github.com/divelab/MoleculeX/blob/molx/imgs/MX-logo.jpg" width="800" class="center" alt="logo"/>
     <br/>
 </p>
 
