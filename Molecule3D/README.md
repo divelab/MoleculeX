@@ -1,6 +1,18 @@
 # Molecule3D: A Benchmark for Predicting 3D Geometries from Molecular Graphs
 In this module, we provide software tools for processing our proposed Molecule3D dataset and codes to reproduce the baseline results. The goal of this module is to provide a benchmark for ground-state geometry prediction. Our paper is available [here](https://openreview.net/forum?id=m5rEiGxOGiL).
 
+## Download Dataset
+Please download the raw data from [here](https://drive.google.com/drive/u/2/folders/1y-EyoDYMvWZwClc2uvXrM4_hQBtM85BI?usp=sharing). Then, put it in your data folder.
+
+```
+|-- workspace
+    |-- main.py
+    |-- data
+        |-- raw
+        |-- processed
+    |-- results
+```
+
 ## Environment setup
 The following dependencies are required to be installed:
 
