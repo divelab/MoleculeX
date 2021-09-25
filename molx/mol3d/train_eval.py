@@ -11,7 +11,7 @@ class Mol3DTrainer():
         self.configs = configs
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
-        self.train_loader = DataLoader(train_dataset, batch_size=configs['batch_size'])
+        self.train_loader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True)
         self.val_loader = DataLoader(val_dataset, batch_size=configs['batch_size'])
         self.out_path = configs['out_path']
         self.start_epoch = 1
@@ -32,11 +32,11 @@ class Mol3DTrainer():
         for batch_data in tqdm(self.train_loader, total=len(self.train_loader)):
             optimizer.zero_grad()
 
-            coords = batch_data.xyz
-            d_target = torch.cdist(coords, coords).float().to(self.device)
-
             batch_data = batch_data.to(self.device)
             mask_d_pred, mask, dist_count = model(batch_data, train=True)
+
+            coords = batch_data.xyz
+            d_target = torch.cdist(coords, coords).float().to(self.device)
             mask_d_target = d_target * mask
 
             loss = criterion(mask_d_pred, mask_d_target) / dist_count  # MAE or MSE
@@ -100,21 +100,21 @@ class Mol3DTrainer():
             if i % self.configs['lr_decay_step_size'] == 0:
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = self.configs['lr_decay_factor'] * param_group['lr']
-            
-            print('====================================')
-            print('epoch: {}; Train -- loss_dist: {:.4f}\n'.format(i, loss_dist))
-            print('epoch: {}; Valid -- val_mae: {:.4f}; val_rmse: {:.4f}; % valid EDM: {:.2f}%;  % valid coords: {:.2f}%;\n'
-                           .format(i, val_mae, val_rmse, val_edm*100, val_coords*100))
-            
-        print('====================================')
-        print('Best valid epoch is {}; Best valid mae: {:.4f}; Best valid rmse: {:.4f}; Best % valid EDM: {:.2f}%; Best % valid coords: {:.2f}%\n'
-                       .format(epoch_bvl, best_val_mae, best_val_rmse, best_val_edm*100, best_val_coords*100))
-        
+
+            print('epoch: {}; Train -- loss: {:.3f}'.format(i, loss_dist))
+            print('epoch: {}; Valid -- val_MAE: {:.3f}; val_RMSE: {:.3f}; val_Validity: {:.2f}%; val_Validity3D: {:.2f}%;'
+                  .format(i, val_mae, val_rmse, val_edm*100, val_coords*100))
+            print('============================================================================================================')
+
+        print('Best valid epoch is {}; Best val_MAE: {:.3f}; Best val_RMSE: {:.3f}; Best val_Validity: {:.2f}%; Best val_Validity3D: {:.2f}%'
+              .format(epoch_bvl, best_val_mae, best_val_rmse, best_val_edm*100, best_val_coords*100))
+        print('============================================================================================================')
+
         return model
 
 
 def eval3d(model, dataset):
-    dataloader = DataLoader(dataset, batch_size=20)
+    dataloader = DataLoader(dataset, batch_size=32)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.eval()
     mses, maes = 0., 0.
@@ -122,12 +122,12 @@ def eval3d(model, dataset):
     i = 0
     for batch_data in tqdm(dataloader, total=len(dataloader), ncols=80):
 
-        coords = batch_data.xyz
-        d_target = torch.cdist(coords, coords).float().to(device)
-
         batch_data = batch_data.to(device)
         with torch.no_grad():
             mask_d_pred, mask, dist_count = model(batch_data, train=False)
+
+        coords = batch_data.xyz
+        d_target = torch.cdist(coords, coords).float().to(device)
         mask_d_target = d_target * mask
 
         # Evaluate errors of distances
