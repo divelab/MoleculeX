@@ -5,8 +5,8 @@ In this module, we provide software tools for processing our proposed Molecule3D
 Please download the raw data from [here](https://drive.google.com/drive/u/2/folders/1y-EyoDYMvWZwClc2uvXrM4_hQBtM85BI?usp=sharing). Then, put it in your data folder.
 
 ```
-|-- workspace
-    |-- main.py
+|-- Molecule3D
+    |-- build_yours.ipynb
     |-- data
         |-- raw
         |-- processed
@@ -22,7 +22,7 @@ The following dependencies are required to be installed:
 - rdkit-pypi
 - pandas
 - [Pytorch](https://pytorch.org/get-started/locally/)
-- [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
+- [Pytorch Geometric >= 1.7.0](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
 
 Then you can install the moleculex package by the following command:
 
@@ -38,6 +38,11 @@ Download the code and go to the Molecule3D directory:
 git clone https://github.com/divelab/MoleculeX
 cd Molecule3D
 ```
+
+## Develop your own models
+
+Create your workspace following the directory tree shown in Download Dataset.
+Follow build_yours.ipynb as an example to develop your own models. 
 
 ### Geometry Prediction
 You can run pred3d_dist.py to train a model for ground-state geometry prediction. Before running, please specify the path to save the checkpoints and other outputs in conf['out_path'], and whether using random or scaffold split in conf['split']. Then, execute the following command:
