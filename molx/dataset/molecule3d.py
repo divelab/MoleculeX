@@ -58,7 +58,7 @@ class Molecule3D(InMemoryDataset):
         assert split_mode in ['random', 'scaffold']
         self.split_mode = split_mode
         self.root = root
-        self.name = 'Molecule3D'
+        self.name = 'data'
         self.target_df = pd.read_csv(osp.join(self.raw_dir, 'properties.csv'))
         # if not osp.exists(self.raw_paths[0]):
         #     self.download()
@@ -262,7 +262,7 @@ class Molecule3DProps(InMemoryDataset):
         assert split_mode in ['random', 'scaffold']
         self.split_mode = split_mode
         self.root = root
-        self.name = 'Molecule3D'
+        self.name = 'data'
         self.process_dir_base = process_dir_base
         self.test_pt_dir = test_pt_dir
 

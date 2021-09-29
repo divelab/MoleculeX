@@ -7,6 +7,13 @@ from torch_geometric.nn.conv.gcn_conv import gcn_norm
 from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
 
 
+def make_mask(batch, device):
+    n = batch.shape[0]
+    mask = torch.eq(batch.unsqueeze(1), batch.unsqueeze(0))
+    mask = (torch.ones((n, n)) - torch.eye(n)).to(device) * mask
+    count = torch.sum(mask)
+    return mask, count
+
 class Deepergcn_dagnn_dist(torch.nn.Module):
     def __init__(self, num_layers, emb_dim, drop_ratio=0.5, 
                  JK="last", aggr='softmax', norm='batch', 
@@ -14,18 +21,23 @@ class Deepergcn_dagnn_dist(torch.nn.Module):
         super(Deepergcn_dagnn_dist, self).__init__()
 
         self.deepergcn_dagnn = DeeperDAGNN_node_Virtualnode(num_layers, emb_dim, drop_ratio, JK, aggr, norm)
-        self.fc = torch.nn.Linear(in_features=emb_dim, out_features=1)
-        self.device = device
+        self.calc_dist = DistMax(emb_dim)
 
     def forward(self, batched_data, train=False):
         xs = self.deepergcn_dagnn(batched_data)
-        d_pred = self.fc(torch.max(xs.unsqueeze(0), xs.unsqueeze(1))).squeeze()
+        mask_d_pred, mask, count = self.calc_dist(xs, batched_data.batch)
+        return mask_d_pred, mask, count
 
-        batch = batched_data.batch
-        n = batch.shape[0]
-        mask = torch.eq(batch.unsqueeze(1), batch.unsqueeze(0))
-        mask = (torch.ones((n, n)) - torch.eye(n)).to(self.device) * mask
-        count = torch.sum(mask)
+
+class DistMax(torch.nn.Module):
+    def __init__(self, emb_dim, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
+        super(DistMax, self).__init__()
+        self.fc = torch.nn.Linear(in_features=emb_dim, out_features=1)
+        self.device = device
+
+    def forward(self, xs, batch, train=False):
+        d_pred = self.fc(torch.max(xs.unsqueeze(0), xs.unsqueeze(1))).squeeze()
+        mask, count = make_mask(batch, self.device)
 
         if train:
             mask_d_pred = d_pred * mask
@@ -41,19 +53,24 @@ class Deepergcn_dagnn_coords(torch.nn.Module):
         super(Deepergcn_dagnn_coords, self).__init__()
 
         self.deepergcn_dagnn = DeeperDAGNN_node_Virtualnode(num_layers, emb_dim, drop_ratio, JK, aggr, norm)
-        self.fc = torch.nn.Linear(in_features=emb_dim, out_features=3)
-        self.device = device
+        self.calc_dist = DistCoords(emb_dim)
 
     def forward(self, batched_data, train=False):
         xs = self.deepergcn_dagnn(batched_data)
+        mask_d_pred, mask, count = self.calc_dist(xs, batched_data.batch)
+        return mask_d_pred, mask, count
+
+
+class DistCoords(torch.nn.Module):
+    def __init__(self, emb_dim, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
+        super(DistCoords, self).__init__()
+        self.fc = torch.nn.Linear(in_features=emb_dim, out_features=3)
+        self.device = device
+
+    def forward(self, xs, batch, train=False):
         xs = self.fc(xs)
         d_pred = torch.cdist(xs, xs)
-
-        batch = batched_data.batch
-        n = batch.shape[0]
-        mask = torch.eq(batch.unsqueeze(1), batch.unsqueeze(0))
-        mask = (torch.ones((n, n)) - torch.eye(n)).to(self.device) * mask
-        count = torch.sum(mask)
+        mask, count = make_mask(batch, self.device)
 
         if train:
             mask_d_pred = d_pred * mask
