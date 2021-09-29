@@ -14,17 +14,28 @@ Please download the raw data from [here](https://drive.google.com/drive/u/2/fold
 ```
 
 ## Environment setup
-The following dependencies are required to be installed:
 
-- scipy
-- IPython
-- tqdm
-- rdkit-pypi
-- pandas
-- [Pytorch](https://pytorch.org/get-started/locally/)
-- [Pytorch Geometric >= 1.7.0](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
+* If you use CUDA 11.0, you can easily setup the environment using the provided yaml file. Please make sure [Anaconda](https://www.anaconda.com) is installed firstly. Then you can execute the following commands one by one to install and activate the environment.
+```linux
+conda env create -f mol3d.yaml
+source activate pred3d  (or conda activate pred3d)
+pip install torch-scatter==latest+cu110 -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-sparse==latest+cu110 -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-cluster==latest+cu110 -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-spline-conv==latest+cu110 -f https://pytorch-geometric.com/whl/torch-1.7.0.html
+pip install torch-geometric
+```
 
-Then you can install the moleculex package by the following command:
+* If you use other CUDA version, you can setup the environment manually. The key packages we used are listed as follows. Note that the versions of PyTorch and PyTorch Geometric should be compatible, and they both need to be compatible with your CUDA version.
+    - scipy
+    - IPython
+    - tqdm
+    - rdkit-pypi
+    - pandas
+    - [Pytorch](https://pytorch.org/get-started/locally/)
+    - [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
+
+After setting up the environment, you can install the moleculex package by the following command:
 
 ```
 pip install moleculex==0.0.3
