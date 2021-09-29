@@ -1,9 +1,9 @@
 # Data Preprocess
 
-Here contains the scripts to generate the dataset from scratch.
+Here contains the scripts to generate the dataset from scratch. The original PubChemQC dataset is orgnized as directories, each containing information of one molecule. We use the `.mol` files and the DFT log files contained in these directories to generate the dataset.
 
 * Use scripts in `filter_mols_dirs` to get a white list of molecule directories whose molecule and properties can be parsed correctly.
-* Generate `.sdf` files from the valid `.mol` files.
+* Run `mols2sdf.py` to generate `.sdf` files from the valid `.mol` files.
 * Run `PubChemQCDataset.py` to generate the dataset.
 * Run `PropertyCSV.py` to extract selected properties of molecules from the DFT log files.
 * Run `split_data.py` to get the random and scaffold split indices.
