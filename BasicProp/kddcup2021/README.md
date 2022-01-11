@@ -25,7 +25,7 @@ python main_gnn.py --log_dir ./log_2d/log_split<split_id>_<run_id> --checkpoint_
 ```
 
 ### Conformers
-We also train a 3d GNN model using conformers generated with RDKit. You can download the processed data from [google drive](https://drive.google.com/file/d/1Q3OSxf1SEi6_J3f2zUGjDzMET15eXTAG/view?usp=sharing). Please refer to [conformer/README.md](onformer/README.md) for details as well as how to generate conformers from scratch. We train one model for each split and ensemble with 5 different epochs.
+We also train a 3d GNN model using conformers generated with RDKit. You can download the processed data from [google drive](https://drive.google.com/file/d/1Q3OSxf1SEi6_J3f2zUGjDzMET15eXTAG/view?usp=sharing). Please refer to [conformer/README.md](conformer/README.md) for details as well as how to generate conformers from scratch. We train one model for each split and ensemble with 5 different epochs.
 ```
 python conformer/main_confs.py --split <split_id>
 ```
