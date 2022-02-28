@@ -1,5 +1,5 @@
 # Advanced Graph and Sequence Neural Networks for Molecular Property Prediction and Drug Discovery
-[[Paper]](https://arxiv.org/abs/2012.01981)[[Supplementary]](https://github.com/divelab/MoleculeX/blob/master/AdvProp/AdvProp_supp.pdf)
+[Paper [Bioinformatics]](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btac112/6531963?login=true)|[Supplementary](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/bioinformatics/PAP/10.1093_bioinformatics_btac112/2/btac112_supplementary_data.pdf?Expires=1649088997&Signature=o6h8d3HSp7cKuIrUIOg5YnBeZVFQrugkMbMnh~NDzeMpRjuYvYKgB~VCrF~wTnnH5Hw7oENdHqdzVh7hIbWlLkc0R6I9P6fmly3ICQN4F~CxUqiI4LOr7xnZkOhqT8c0ONypTaFhEJhEu4AA8PVsCpCWxfMN0TiNvt753boZSbcHeZlxHx-ji3z89wrWN-Ac7NGM-bEFRUnY8oD9RmHrDHsrc5VML8xcCe30~wvZ40PHYJRtVDnawuWfMX8Zh0LSBbVzhkvx8Zp5xEfVab~qv3U5jAMVQT6a8CDJXaoYqBDwWkHQHH87orTO2RLIAueH9G4WxIvtocFOTMaQ6TLuiQ__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA)
 
 ## Overview
 
